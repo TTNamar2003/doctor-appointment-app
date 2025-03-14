@@ -17,7 +17,7 @@ export default function Login() {
                 <span>Sign up here.</span>
             </div>
             <form action="" className={styles.form_div}>
-                <div className={styles.email_div}>
+                <div className={styles.label_input_flex_div}>
                     <label htmlFor="email">Email</label>
                     <div className={styles.input_div}>
                         <div className={styles.wrapper_input}>
@@ -26,7 +26,7 @@ export default function Login() {
                         </div>
                     </div>
                 </div>
-                <div className={styles.password_div}>
+                <div className={styles.label_input_flex_div}>
                     <label htmlFor="password">Password</label>
                     <div className={styles.input_div}>
                         <div className={styles.wrapper_input}>

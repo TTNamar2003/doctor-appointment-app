@@ -1,0 +1,81 @@
+.card_container{
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background-color: #F8FCF9;
+    border: 1px solid #E0E8E0;
+    border-radius: 16px;
+    justify-content: space-between;
+    align-items: center;
+    padding: 32px 19px;
+    flex-grow: 1;
+    /* width: 100%; */
+}
+
+
+.doctor_profile{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+    width: 90%;
+}
+
+.doctor_profile > img{
+    border-radius: 99px;
+}
+
+.doctor_description{
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.name_degree_div{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+    justify-content: center;
+    align-items: center;
+}
+
+.typeOfDoctor_YOE{
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex_img_para{
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.rating_div{
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+}
+
+.appointment_btn_div {
+    border: 1px solid #DEDEDE;
+    border-radius: 10px;
+    width: 90%;
+}
+.appointment_btn_div button{
+  
+    width: 100%;
+    border-radius: 10px;
+    background-color: #F8FCF9;
+    height: 100%;
+    border: none;
+    padding: 12px 40px;
+    
+
+}

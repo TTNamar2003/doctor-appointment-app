@@ -24,7 +24,7 @@ export default function Header() {
                 <div className={styles.navButton_component}>
                     <NavButtons />
                 </div>
-              
+
                 <div className={styles.hamburger} onClick={() => setIsOpen(true)}>
                     <div className={styles.navButton_component}>
                         <NavButtons />
@@ -33,19 +33,19 @@ export default function Header() {
                 </div>
 
             </nav>
-        
+
             {isOpen && (
                 <div className={styles.overlay} onClick={() => setIsOpen(false)}>
-                    <div className={styles.sidebar} onClick={(e) => e.stopPropagation()}>
+                    <aside className={styles.sidebar} onClick={(e) => e.stopPropagation()}>
                         <button className={styles.crossBtn} onClick={() => setIsOpen(false)}>X</button>
-                       
+
                         <div className={styles.navLinks_component}>
-                        <NavLinks />
-                    </div>
-                    <div className={styles.navButton_component}>
-                    <NavButtons />
-                </div>
-                    </div>
+                            <NavLinks />
+                        </div>
+                        <div className={styles.navButton_component}>
+                            <NavButtons />
+                        </div>
+                    </aside>
                 </div>
             )}
 

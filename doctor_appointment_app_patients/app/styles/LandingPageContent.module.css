@@ -1,0 +1,55 @@
+.landingPage_text_section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #1C4A2A;
+    width: 100%;
+    padding: 12px 12px;
+    padding-left: 40px;
+    order: 4;
+    height: 50%;
+    gap: 16px;
+    
+}
+
+.text_section_content h3 {
+    color: white;
+    align-self: flex-start;
+    /* text-align: center; */
+}
+
+.text_section_content p {
+    color: rgba(255, 255, 255, 0.7);
+
+    max-width: 350px;
+    /* text-align: center; */
+}
+
+.text_section_btn_div button{
+    background-color: white;
+    color: #1C4A2A;
+    padding: 10px 24px;
+    border-radius: 10px;
+}
+
+
+
+
+@media screen and (min-width:1000px) {
+    .landingPage_text_section{
+        height: 100%;
+        width: 50%;
+        padding: 10%;
+       
+    }
+    .text_section_content h3{
+        align-self:flex-start;
+       
+       
+    }
+    .text_section_content p{
+        align-self: flex-start;
+       
+    }
+}
+

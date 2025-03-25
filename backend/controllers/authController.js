@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../model/userModel.js";
+import { signupSchema, loginSchema } from "../utils/validator.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "hello123";
 
@@ -9,52 +10,20 @@ const createToken = (payload) => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: "2d" });
 };
 
-// function to validate input user
-const validateInput = ({ name, email, password, phone_number }, type) => {
-  const errors = [];
-
-  // name validation (only letters, 2-50 chars)
-  if (type === "signup" && (!name || !/^[A-Za-z\s]{2,50}$/.test(name))) {
-    errors.push("Invalid name. Only letters allowed (2-50 chars).");
-  }
-
-  // email validation
-  if (
-    !email ||
-    !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)
-  ) {
-    errors.push("Invalid email format.");
-  }
-
-  // password validation (min 6 chars, at least 1 number & 1 special char)
-  if (
-    type === "signup" &&
-    (!password ||
-      !/^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{6,}$/.test(password))
-  ) {
-    errors.push(
-      "Password must be at least 6 characters long and include a number & special character."
-    );
-  }
-
-  // phone number validation (10-digit number)
-  if (type === "signup" && (!phone_number || !/^\d{10}$/.test(phone_number))) {
-    errors.push("Invalid phone number. Must be a 10-digit number.");
-  }
-
-  return errors;
-};
-
 // signup Controller
 export const signup = async (req, res) => {
   try {
-    const { name, email, password, phone_number, role } = req.body;
-
-    // validate input
-    const errors = validateInput(req.body, "signup");
-    if (errors.length > 0) {
-      return res.status(400).json({ message: "Validation error", errors });
+    // Validate input first
+    const { error } = signupSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      const validationErrors = error.details.map((detail) => detail.message);
+      return res.status(400).json({
+        message: "Validation error",
+        errors: validationErrors,
+      });
     }
+
+    const { name, email, password, phone_number, role } = req.body;
 
     // check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -109,13 +78,17 @@ export const signup = async (req, res) => {
 // login Controller
 export const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // validate input
-    const errors = validateInput(req.body, "login");
-    if (errors.length > 0) {
-      return res.status(400).json({ message: "Validation error", errors });
+    // Validate input first
+    const { error } = loginSchema.validate(req.body, { abortEarly: false });
+    if (error) {
+      const validationErrors = error.details.map((detail) => detail.message);
+      return res.status(400).json({
+        message: "Validation error",
+        errors: validationErrors,
+      });
     }
+
+    const { email, password } = req.body;
 
     // find user by email
     const user = await User.findByEmail(email);

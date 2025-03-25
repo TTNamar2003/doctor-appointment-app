@@ -1,9 +1,9 @@
 import express from "express";
 import dotenv from "dotenv";
 import authRouter from "./routes/authRoute.js";
+import doctorRouter from "./routes/doctorRoute.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import isAuth from "./middleware/isAuth.js";
 
 dotenv.config();
 const app = express();
@@ -14,6 +14,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/", authRouter);
+app.use("/", doctorRouter);
+
+// app.use("/", adminRouter);
 //update postman url
 // app.use(isAuth);
 // app.use("/api/user", userRouter);

@@ -23,7 +23,7 @@ export const signup = async (req, res) => {
       });
     }
 
-    const { name, email, password, phone_number, role } = req.body;
+    const { name, email, password, role } = req.body;
 
     // check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -40,7 +40,6 @@ export const signup = async (req, res) => {
       name,
       email,
       password_hashed: hashedPassword,
-      phone_number,
       role: role || "user",
     });
 
@@ -50,7 +49,9 @@ export const signup = async (req, res) => {
     }
 
     // generate JWT Token
+    console.log(savedUser);
     const token = createToken({
+      user_id: savedUser.user_id,
       email: newUser.email,
       role: newUser.role,
       name: newUser.name,
@@ -104,9 +105,11 @@ export const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
+    // get user_id
 
     // generate JWT token
     const token = createToken({
+      user_id: user.user_id,
       email: user.email,
       role: user.role,
       name: user.name,

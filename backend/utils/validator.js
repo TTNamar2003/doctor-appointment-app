@@ -81,7 +81,6 @@ export const signupSchema = Joi.object({
   name: commonValidations.name().required(),
   email: commonValidations.email().required(),
   password: commonValidations.password().required(),
-  phone_number: commonValidations.phone().required(),
   role: Joi.string().valid("user", "admin").default("user"),
 });
 

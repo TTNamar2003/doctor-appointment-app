@@ -13,14 +13,15 @@ const isAuth = (req, res, next) => {
 
     // Verify the token
     const decoded = jwt.verify(token, JWT_SECRET);
-
+    console.log(decoded);
     // Attach user info to request object
     req.user = {
+      user_id: decoded.user_id,
       email: decoded.email,
       name: decoded.name,
       role: decoded.role,
     };
-
+    console.log(req.user);
     next(); // Move to the next middleware or route handler
   } catch (error) {
     return res

@@ -13,15 +13,6 @@ class DoctorModel {
       location,
     } = doctorData;
 
-    // Validate inputs
-    // if (!validateName(name)) {
-    //     throw new Error('Invalid name format');
-    // }
-
-    // if (!validateEmail(email)) {
-    //     throw new Error('Invalid email format');
-    // }
-
     const query = `
               INSERT INTO doctor_details (
                   name,
@@ -158,6 +149,73 @@ class DoctorModel {
         throw new Error("Email already exists");
       }
       console.error("Error updating doctor:", error);
+      throw error;
+    }
+  }
+
+  static async insertSchedule(scheduleData) {
+    try {
+      await db.query("BEGIN");
+
+      const { doctor_id, date, shift, slotData } = scheduleData;
+
+      // Parse slotData from string to JSON object
+      const slots = JSON.parse(slotData);
+
+      const insertQuery = `
+            INSERT INTO availability 
+            (doctor_id, date, shift, slots) 
+            VALUES ($1, $2, $3, $4) 
+            RETURNING availability_id
+        `;
+
+      const result = await db.query(insertQuery, [
+        doctor_id,
+        date,
+        shift,
+        JSON.stringify(slots), // Ensure it's stored as JSON
+      ]);
+
+      await db.query("COMMIT");
+
+      return result.rows[0].availability_id;
+    } catch (error) {
+      await db.query("ROLLBACK");
+      throw error;
+    }
+  }
+
+  static async checkExistingSchedule(doctor_id, date, shift) {
+    try {
+      const query = `
+          SELECT slots FROM availability
+          WHERE doctor_id = $1
+          AND date = $2
+          AND shift = $3
+      `;
+      const result = await db.query(query, [doctor_id, date, shift]);
+
+      return result.rows.length > 0 ? result.rows[0] : null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  static async updateSlots(updatedSlotData, doctor_id, date, shift) {
+    try {
+      const query = `
+              UPDATE availability 
+              SET slots = $1 WHERE doctor_id = $2 
+              AND date = $3 AND shift = $4
+          `;
+      const result = await db.query(query, [
+        updatedSlotData,
+        doctor_id,
+        date,
+        shift,
+      ]);
+      return result.rows[0];
+    } catch (error) {
       throw error;
     }
   }

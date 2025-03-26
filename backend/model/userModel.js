@@ -1,25 +1,18 @@
 import db from "../config/db.js";
 
 class User {
-  constructor({ email, name, password_hashed, phone_number, role }) {
+  constructor({ email, name, password_hashed, role }) {
     this.email = email;
     this.name = name;
     this.password_hashed = password_hashed;
-    this.phone_number = phone_number;
     this.role = role;
   }
 
   async save() {
     try {
-      const query = `INSERT INTO users (email, name, password_hashed, phone_number, role, created_at, updated_at) 
-                           VALUES ($1, $2, $3, $4, $5, NOW(), NOW()) RETURNING *`;
-      const values = [
-        this.email,
-        this.name,
-        this.password_hashed,
-        this.phone_number,
-        this.role,
-      ];
+      const query = `INSERT INTO users (email, name, password_hashed, role, created_at, updated_at) 
+                           VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *`;
+      const values = [this.email, this.name, this.password_hashed, this.role];
       const { rows } = await db.query(query, values);
       return rows[0];
     } catch (err) {

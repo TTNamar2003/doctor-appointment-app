@@ -1,6 +1,8 @@
 import express from "express";
 import isAuth from "../middleware/isAuth.js";
 import isAdmin from "../middleware/isAdmin.js";
+import { bookAppointment } from "../controllers/appointmentController.js";
+import { addSchedule } from "../controllers/availabilityController.js";
 import {
   createDoctor,
   editDoctor,
@@ -20,6 +22,10 @@ router.patch("/updateDoctor/:doctorId", isAdmin, editDoctor);
 router.delete("/removeDoctor/:doctorId", isAdmin, removeDoctor);
 
 // add doctor schedule
-// router.post("/doctor/:doctorid/addSchedule", isAdmin, addSchedule);
+router.post("/doctor/:doctorid/addSchedule", isAdmin, addSchedule);
+
+// book appointment
+
+router.post("/doctor/:id/booking", bookAppointment);
 
 export default router;

@@ -3,7 +3,7 @@ import DoctorModel from "../model/doctorModel.js";
 export const addSchedule = async (req, res) => {
   try {
     const { date, shift, slot } = req.body;
-    const doctor_id = req.params.doctorid;
+    const doctor_id = req.params.doctorId;
 
     if (!doctor_id || !date || !shift || !slot || !Array.isArray(slot.start)) {
       return res

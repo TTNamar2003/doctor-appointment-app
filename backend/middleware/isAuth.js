@@ -21,7 +21,7 @@ const isAuth = (req, res, next) => {
       name: decoded.name,
       role: decoded.role,
     };
-    console.log(req.user);
+    // console.log(req.user);
     next(); // Move to the next middleware or route handler
   } catch (error) {
     return res

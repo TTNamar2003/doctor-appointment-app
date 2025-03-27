@@ -1,4 +1,5 @@
 import db from "../config/db.js";
+
 class DoctorModel {
   // Create a new doctor
   static async createDoctor(doctorData) {
@@ -71,11 +72,12 @@ class DoctorModel {
 
   // Get doctor by ID
   static async getDoctorById(doctorId) {
+    console.log(doctorId);
     const query = "SELECT * FROM doctor_details WHERE doctor_id = $1";
 
     try {
       const result = await db.query(query, [doctorId]);
-
+      console.log(result.rowCount);
       if (result.rowCount === 0) {
         return null;
       }
@@ -219,6 +221,99 @@ class DoctorModel {
       throw error;
     }
   }
+
+  static async getTotalDoctorRecords(filters) {
+    const { query, values, index } = buildDoctorQuery(filters, true);
+    console.log(query, values, index);
+    try {
+      const result = await db.query(query, values);
+      return parseInt(result.rows[0].total_count);
+    } catch (error) {
+      console.error("Error getting total doctor records:", error);
+      throw error;
+    }
+  }
+
+  static async getFilteredDoctors(filters, pageNo, pageSize = 6) {
+    const { query, values, index } = buildDoctorQuery(filters, false);
+
+    const offset = (pageNo - 1) * pageSize;
+    const paginatedQuery = `${query} LIMIT $${index} OFFSET $${index + 1}`;
+    values.push(pageSize, offset);
+
+    try {
+      const result = await db.query(paginatedQuery, values);
+      return result.rows;
+    } catch (error) {
+      console.error("Error getting filtered doctors:", error);
+      throw error;
+    }
+  }
 }
+
+const buildDoctorQuery = (filters, countOnly = false) => {
+  let query = countOnly
+    ? `SELECT COUNT(*) AS total_count FROM doctor_details WHERE 1=1`
+    : `SELECT * FROM doctor_details WHERE 1=1`;
+
+  const values = [];
+  let index = 1;
+
+  // Specialty Filter (Partial Match)
+  if (filters.specialty) {
+    query += ` AND EXISTS (SELECT 1 FROM unnest(specialty) AS d WHERE d ILIKE $${index})`;
+    values.push(`%${filters.specialty}%`); // Correct use of ILIKE for partial match
+    index++;
+  }
+  // Disease Filter (Partial Match)
+  if (filters.disease) {
+    query += ` AND EXISTS (SELECT 1 FROM unnest(disease) AS d WHERE d ILIKE $${index})`;
+    values.push(`%${filters.disease}%`); // Correct use of ILIKE for partial match
+    index++;
+  }
+
+  // Doctor Name (Partial Match)
+  if (filters.name) {
+    query += ` AND name ILIKE $${index}`;
+    values.push(`%${filters.name}%`);
+    index++;
+  }
+
+  // Gender Filter (Skip if "All")
+  if (filters.gender && filters.gender.toLowerCase() !== "all") {
+    query += ` AND gender = $${index}`;
+    values.push(filters.gender);
+    index++;
+  }
+
+  // Rating Filter (Skip if "All")
+  console.log("rating : ", filters.rating);
+  if (filters.rating) {
+    query += ` AND average_rating = $${index}`;
+    values.push(parseFloat(filters.rating));
+    index++;
+  }
+
+  // Experience Filter (Handles "All" and Range)
+  if (filters.experience && filters.experience.toLowerCase() !== "all") {
+    if (filters.experience.includes("-")) {
+      const [minExp, maxExp] = filters.experience.split("-").map(Number);
+      query += ` AND experience_year BETWEEN $${index} AND $${index + 1}`;
+      values.push(minExp, maxExp);
+      index += 2;
+    } else {
+      query += ` AND experience_year >= $${index}`;
+      values.push(parseInt(filters.experience));
+      index++;
+    }
+  }
+
+  // Sorting (Default: Rating Descending if No Filters)
+  if (!countOnly) {
+    query += ` ORDER BY average_rating DESC`;
+  }
+
+  return { query, values, index };
+};
 
 export default DoctorModel;

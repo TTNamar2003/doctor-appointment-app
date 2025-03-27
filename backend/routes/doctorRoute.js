@@ -1,12 +1,15 @@
 import express from "express";
 import isAuth from "../middleware/isAuth.js";
 import isAdmin from "../middleware/isAdmin.js";
+import reviewRouter from "../routes/reviewRoute.js";
 import { bookAppointment } from "../controllers/appointmentController.js";
 import { addSchedule } from "../controllers/availabilityController.js";
 import {
   createDoctor,
   editDoctor,
   removeDoctor,
+  getDoctorDetail,
+  searchDoctors,
 } from "../controllers/doctorController.js";
 
 const router = express.Router();
@@ -21,11 +24,18 @@ router.patch("/updateDoctor/:doctorId", isAdmin, editDoctor);
 // Remove doctor route
 router.delete("/removeDoctor/:doctorId", isAdmin, removeDoctor);
 
+// get all reviewed data
+
+router.use("/doctor/", reviewRouter);
+
+router.get("/doctor/search", searchDoctors);
+// get doctor detail
+router.get("/doctor/:doctorId", getDoctorDetail);
+
 // add doctor schedule
-router.post("/doctor/:doctorid/addSchedule", isAdmin, addSchedule);
+router.post("/doctor/:doctorId/addSchedule", isAdmin, addSchedule);
 
 // book appointment
-
 router.post("/doctor/:id/booking", bookAppointment);
 
 export default router;

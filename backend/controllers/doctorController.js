@@ -211,5 +211,84 @@ export const removeDoctor = async (req, res) => {
   }
 };
 
+export const getDoctorDetail = async (req, res) => {
+  try {
+    const doctor_id = req.params.doctorId;
+
+    const doctor = await DoctorModel.getDoctorById(doctor_id);
+
+    res.status(200).json({
+      message: "Doctor detail retrieve successfully",
+      doctor,
+    });
+  } catch (error) {
+    console.error("retrieval doctor error by id :", error);
+
+    // Handle specific error cases
+    if (error.message === "Doctor not found") {
+      return res.status(404).json({
+        error: "Doctor not found",
+      });
+    }
+
+    res.status(500).json({
+      error: "failed to retrieve doctor detail",
+      details: error.message,
+    });
+  }
+};
+
+export const searchDoctors = async (req, res) => {
+  try {
+    // Extract query parameters
+    const {
+      gender,
+      experience,
+      rating,
+      doctor_name,
+      specialty,
+      disease,
+      pageNo = 1,
+    } = req.query;
+
+    const filters = {
+      gender,
+      experience: experience,
+      rating: rating
+        ? rating.toLowerCase() == "all"
+          ? null
+          : parseFloat(rating)
+        : null,
+      doctor_name,
+      specialty,
+      disease,
+    };
+
+    const parsedPageNo = parseInt(pageNo);
+    const pageSize = 6;
+    // Get total records count only for the first page
+    const totalRecords =
+      parsedPageNo === 1
+        ? await DoctorModel.getTotalDoctorRecords(filters)
+        : null;
+
+    // Fetch paginated data
+    const data = await DoctorModel.getFilteredDoctors(
+      filters,
+      parsedPageNo,
+      pageSize
+    );
+    res.json({
+      totalRecords: totalRecords ?? data.length,
+      totalPages: Math.ceil((totalRecords ?? data.length) / pageSize),
+      currentPage: parsedPageNo,
+      data,
+    });
+  } catch (error) {
+    console.error("Error searching doctors:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 // Export for route setup
-export default { createDoctor, editDoctor, removeDoctor };
+export default { createDoctor, editDoctor, removeDoctor, searchDoctors };

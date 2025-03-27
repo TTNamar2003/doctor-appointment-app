@@ -102,3 +102,26 @@ export const doctorSchema = Joi.object({
   location: Joi.string().optional().allow(null),
   average_rating: commonValidations.rating().optional(),
 });
+
+// Validation helpers
+export const validateFilters = (filters) => {
+  // Allowed values for validation
+  const VALID_STATUSES = ["pending", "cancelled", "confirmed", "completed"];
+  const VALID_SHIFTS = ["morning", "evening"];
+  const { date, doctor_name, shift, status } = filters;
+
+  // Validate date format
+  if (date && !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    throw new Error("Invalid date format. Use YYYY-MM-DD.");
+  }
+
+  // Validate status
+  if (status && !VALID_STATUSES.includes(status.toLowerCase())) {
+    throw new Error(`Invalid status. Allowed: ${VALID_STATUSES.join(", ")}`);
+  }
+
+  // Validate shift
+  if (shift && !VALID_SHIFTS.includes(shift.toLowerCase())) {
+    throw new Error(`Invalid shift. Allowed: ${VALID_SHIFTS.join(", ")}`);
+  }
+};

@@ -5,16 +5,17 @@ import {
   updateAppointmentStatus,
   addSlotBackToAvailability,
   validateStatusUpdate,
+  getAvailabilityData,
 } from "../model/appointmentModel.js";
-
+import { sendNotification } from "../controllers/notificationController.js";
 import db from "../config/db.js";
 import { validateFilters } from "../utils/validator.js";
 export const getApprovals = async (req, res) => {
   try {
-    // Destructure query parameters with default values
+    // destructing
     const { date, doctor_name, shift, status, pageNo = 1 } = req.query;
 
-    // Prepare filters
+    // prepare filters
     const filters = {
       date,
       doctor_name,
@@ -22,7 +23,7 @@ export const getApprovals = async (req, res) => {
       status,
     };
 
-    // Validate filters
+    // validate filters
     validateFilters(filters);
 
     // Convert pageNo to integer
@@ -31,17 +32,17 @@ export const getApprovals = async (req, res) => {
 
     let totalRecords, data;
 
-    // If pageNo is 1, fetch total records first
+    // if pageNo is 1, fetch total records first
     if (parsedPageNo === 1) {
       totalRecords = await getTotalAppointmentRecords(filters);
       data = await getFilteredAppointments(filters, parsedPageNo, pageSize);
     } else {
-      // For other pages, only fetch filtered records
+      // for other pages, only fetch filtered records
       data = await getFilteredAppointments(filters, parsedPageNo, pageSize);
       totalRecords = data.length;
     }
 
-    // Prepare response
+    // prepare response
     res.json({
       totalRecords,
       totalPages: Math.ceil(totalRecords / pageSize),
@@ -51,12 +52,12 @@ export const getApprovals = async (req, res) => {
   } catch (error) {
     console.error("Error fetching approvals:", error);
 
-    // Handle specific validation errors
+    // handle specific validation errors
     if (error.message.includes("Invalid")) {
       return res.status(400).json({ error: error.message });
     }
 
-    // Generic server error
+    // generic server error
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
@@ -68,7 +69,7 @@ export const patchAppointmentStatus = async (req, res) => {
     const { appointment_id } = req.params;
     const { status, start_time } = req.body;
 
-    // Validate input
+    // validate input
     if (!appointment_id) {
       return res.status(400).json({ error: "Appointment ID is required" });
     }
@@ -79,26 +80,26 @@ export const patchAppointmentStatus = async (req, res) => {
       });
     }
 
-    // Validate start_time for cancellation
+    // validate start_time for cancellation
     if (status === "cancelled" && !start_time) {
       return res
         .status(400)
         .json({ error: "Start time is required for cancellation" });
     }
 
-    // Begin transaction
+    // begin transaction
     await client.query("BEGIN");
 
-    // Fetch appointment details
+    // fetch appointment details
     const appointmentDetails = await getAppointmentDetails(appointment_id);
 
-    // Check if appointment exists
+    // check if appointment exists
     if (!appointmentDetails) {
       await client.query("ROLLBACK");
       return res.status(404).json({ error: "Appointment not found" });
     }
 
-    // Validate status update
+    // validate status update
     try {
       validateStatusUpdate(appointmentDetails, status);
     } catch (validationError) {
@@ -106,9 +107,8 @@ export const patchAppointmentStatus = async (req, res) => {
       return res.status(400).json({ error: validationError.message });
     }
     console.log("checking ", appointmentDetails, status);
-    // Update appointment status
 
-    // Handle cancelled status (add slot back to availability)
+    // handle cancelled status (add slot back to availability)
     if (status === "cancelled") {
       await addSlotBackToAvailability(
         appointmentDetails.availability_id,
@@ -122,20 +122,38 @@ export const patchAppointmentStatus = async (req, res) => {
       status
     );
 
-    // Commit transaction
+    // commit transaction
     await client.query("COMMIT");
 
     res.status(200).json({
       message: `Appointment status updated to ${status}`,
       newStatus: status,
     });
+
+    const availabilityData = await getAvailabilityData(
+      updatedAppointment.availability_id
+    );
+
+    Promise.resolve().then(() =>
+      sendNotification({
+        user_id: req.user.user_id,
+        appointment_id: updatedAppointment.appointment_id,
+        doctor_id: updatedAppointment.doctor_id,
+        booking_type: updatedAppointment.booking_type,
+        date: availabilityData.date,
+        user_email: req.user.email,
+        booking_status: status,
+        startTime: updatedAppointment.start_time,
+        endTime: updatedAppointment.end_time,
+      })
+    );
   } catch (error) {
-    // Rollback transaction in case of error
+    // rollback transaction in case of error
     await client.query("ROLLBACK");
     console.error("Error updating appointment status:", error);
     res.status(500).json({ error: "Internal Server Error" });
   } finally {
-    // Release the client back to the db
+    // release the client back to the db
     client.release();
   }
 };

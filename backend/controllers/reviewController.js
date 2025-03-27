@@ -85,7 +85,7 @@ export const postReview = async (req, res) => {
     } = req.params;
     const { rating, comment } = req.body;
 
-    // Validate inputs
+    // validate inputs
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: "Rating must be between 1 and 5." });
     }
@@ -94,7 +94,7 @@ export const postReview = async (req, res) => {
       return res.status(400).json({ error: "Comment cannot be empty." });
     }
 
-    // Call model function to insert review
+    // call model function to insert review
     const review = await createReview(doctorId, appointmentId, rating, comment);
 
     res.status(201).json({ message: "Review added successfully", review });

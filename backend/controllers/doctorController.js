@@ -1,10 +1,10 @@
 import DoctorModel from "../model/doctorModel.js";
 import { doctorSchema } from "../utils/validator.js";
 
-// Create doctor controller function
+// create doctor controller function
 export const createDoctor = async (req, res) => {
   try {
-    // Validate input first
+    // validate input first
     const { error } = doctorSchema.validate(req.body, { abortEarly: false });
     if (error) {
       const validationErrors = error.details.map((detail) => detail.message);
@@ -14,7 +14,7 @@ export const createDoctor = async (req, res) => {
       });
     }
 
-    // Destructure request body
+    // destructuring
     const {
       name,
       email,
@@ -26,7 +26,7 @@ export const createDoctor = async (req, res) => {
       average_rating,
     } = req.body;
 
-    // Prepare doctor data
+    // prepare the doctor data
     const doctorData = {
       name,
       email,
@@ -38,10 +38,10 @@ export const createDoctor = async (req, res) => {
       average_rating: average_rating || 0,
     };
 
-    // Create doctor
+    // create doctor
     const newDoctor = await DoctorModel.createDoctor(doctorData);
 
-    // Respond with created doctor details
+    // respond with created doctor details
     res.status(201).json({
       message: "Doctor created successfully",
       doctor: {
@@ -54,7 +54,7 @@ export const createDoctor = async (req, res) => {
   } catch (error) {
     console.error("Create doctor error:", error);
 
-    // Handle specific error cases
+    // handle specific error cases
     if (error.message === "Email already exists") {
       return res.status(409).json({
         error: "Email already exists",
@@ -68,31 +68,21 @@ export const createDoctor = async (req, res) => {
   }
 };
 
-// Edit doctor controller function
+// edit doctor controller function
 export const editDoctor = async (req, res) => {
   try {
     const { doctorId } = req.params;
     const updateData = req.body;
-    console.log(updateData);
-    // Validate doctor ID format
-    // const uuidRegex =
-    //   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    // if (!doctorId || !uuidRegex.test(doctorId)) {
-    //   return res.status(400).json({
-    //     error: "Invalid doctor ID format",
-    //   });
-    // }
 
-    // Validate that at least one field is being updated
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({
         error: "No update data provided",
       });
     }
 
-    // Validate input with optional name (for updates)
+    // validate input
     const { error } = doctorSchema
-      .fork(["name", "email", "degree"], (schema) => schema.optional()) // Corrected fork usage
+      .fork(["name", "email", "degree"], (schema) => schema.optional())
       .validate(updateData, { abortEarly: false });
 
     if (error) {
@@ -103,7 +93,7 @@ export const editDoctor = async (req, res) => {
       });
     }
 
-    // Prepare update data (only include defined fields)
+    // prepare update data
     const filteredUpdateData = {};
     const allowedFields = [
       "name",
@@ -122,13 +112,13 @@ export const editDoctor = async (req, res) => {
       }
     });
 
-    // Update doctor
+    // update doctor
     const updatedDoctor = await DoctorModel.updateDoctor(
       doctorId,
       filteredUpdateData
     );
 
-    // Respond with updated doctor details
+    // respond with updated doctor details
     res.status(200).json({
       message: "Doctor updated successfully",
       doctor: {
@@ -141,7 +131,7 @@ export const editDoctor = async (req, res) => {
   } catch (error) {
     console.error("Edit doctor error:", error);
 
-    // Handle specific error cases
+    // handle specific error cases
     if (error.message === "Doctor not found") {
       return res.status(404).json({
         error: "Doctor not found",
@@ -161,19 +151,19 @@ export const editDoctor = async (req, res) => {
   }
 };
 
-// Remove doctor controller function
+// remove doctor controller function
 export const removeDoctor = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    // Validate doctor ID format (assuming UUID)
+    // validate doctor ID format
     if (!doctorId) {
       return res.status(400).json({
         error: "Doctor ID is required",
       });
     }
 
-    // Validate UUID format
+    // validate UUID format
     const uuidRegex =
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     if (!uuidRegex.test(doctorId)) {
@@ -182,10 +172,10 @@ export const removeDoctor = async (req, res) => {
       });
     }
 
-    // Attempt to remove doctor
+    // attempt to remove doctor
     const removedDoctor = await DoctorModel.removeDoctor(doctorId);
 
-    // Respond with success message
+    // respond with success message
     res.status(200).json({
       message: "Doctor removed successfully",
       doctor: {
@@ -197,7 +187,7 @@ export const removeDoctor = async (req, res) => {
   } catch (error) {
     console.error("Remove doctor error:", error);
 
-    // Handle specific error cases
+    // handle specific error cases
     if (error.message === "Doctor not found") {
       return res.status(404).json({
         error: "Doctor not found",
@@ -224,7 +214,7 @@ export const getDoctorDetail = async (req, res) => {
   } catch (error) {
     console.error("retrieval doctor error by id :", error);
 
-    // Handle specific error cases
+    // handle specific error cases
     if (error.message === "Doctor not found") {
       return res.status(404).json({
         error: "Doctor not found",
@@ -240,7 +230,7 @@ export const getDoctorDetail = async (req, res) => {
 
 export const searchDoctors = async (req, res) => {
   try {
-    // Extract query parameters
+    // extract query parameters
     const {
       gender,
       experience,
@@ -266,13 +256,13 @@ export const searchDoctors = async (req, res) => {
 
     const parsedPageNo = parseInt(pageNo);
     const pageSize = 6;
-    // Get total records count only for the first page
+    // get total records count only for the first page
     const totalRecords =
       parsedPageNo === 1
         ? await DoctorModel.getTotalDoctorRecords(filters)
         : null;
 
-    // Fetch paginated data
+    // fetch paginated data
     const data = await DoctorModel.getFilteredDoctors(
       filters,
       parsedPageNo,
@@ -290,5 +280,4 @@ export const searchDoctors = async (req, res) => {
   }
 };
 
-// Export for route setup
 export default { createDoctor, editDoctor, removeDoctor, searchDoctors };

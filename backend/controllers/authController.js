@@ -13,7 +13,7 @@ const createToken = (payload) => {
 // signup Controller
 export const signup = async (req, res) => {
   try {
-    // Validate input first
+    // validate input first
     const { error } = signupSchema.validate(req.body, { abortEarly: false });
     if (error) {
       const validationErrors = error.details.map((detail) => detail.message);
@@ -79,7 +79,7 @@ export const signup = async (req, res) => {
 // login Controller
 export const login = async (req, res) => {
   try {
-    // Validate input first
+    // validate input first
     const { error } = loginSchema.validate(req.body, { abortEarly: false });
     if (error) {
       const validationErrors = error.details.map((detail) => detail.message);
@@ -105,7 +105,6 @@ export const login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    // get user_id
 
     // generate JWT token
     const token = createToken({
@@ -118,9 +117,9 @@ export const login = async (req, res) => {
     // set token in HTTP cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // Secure in production
+      secure: false,
       sameSite: "none",
-      maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+      maxAge: 2 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(200).json({ message: "Login successful" });

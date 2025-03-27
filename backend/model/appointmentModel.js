@@ -1,6 +1,5 @@
 import db from "../config/db.js";
 
-// **Check Availability**
 export const checkAvailability = async (doctor_id, date, shift) => {
   try {
     const query = `
@@ -17,7 +16,21 @@ export const checkAvailability = async (doctor_id, date, shift) => {
   }
 };
 
-// **Insert Appointment**
+export const getAvailabilityData = async (availability_id) => {
+  try {
+    const query = `
+      SELECT * 
+      FROM availability 
+      WHERE availability_id = $1;
+    `;
+    const result = await db.query(query, [availability_id]);
+    return result.rows[0];
+  } catch (error) {
+    console.error("Error get availability data:", error);
+    throw new Error("Database error");
+  }
+};
+
 export const createAppointment = async (
   doctor_id,
   availability_id,
@@ -28,7 +41,7 @@ export const createAppointment = async (
   try {
     const query = `
       INSERT INTO appointments (doctor_id, availability_id, start_time, end_time, status, booking_type)
-      VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING appointment_id;
+      VALUES ($1, $2, $3, $4, 'pending', $5) RETURNING *;
     `;
     const result = await db.query(query, [
       doctor_id,
@@ -129,7 +142,6 @@ export const getFilteredAppointments = async (
   }
 };
 
-// **Update Availability**
 export const updateAvailability = async (slots, availability_id) => {
   try {
     const query = `UPDATE availability SET slots = $1 WHERE availability_id = $2;`;
@@ -154,7 +166,6 @@ export const updateAppointmentPatient = async (patient_id, appointment_id) => {
   }
 };
 
-// **Insert Patient**
 export const insertPatient = async (
   name,
   age,
@@ -183,14 +194,6 @@ export const insertPatient = async (
     throw new Error("Database error");
   }
 };
-
-//
-
-//
-
-//
-
-//
 
 export const getAppointmentDetails = async (appointment_id) => {
   const query = `
@@ -238,7 +241,7 @@ export const addSlotBackToAvailability = async (
   start_time,
   currentSlots
 ) => {
-  // Calculate slot details
+  // calculate slot details
   console.log("slots ", availability_id, start_time, currentSlots);
   const [startHour, startMinute] = start_time.split(":").map(Number);
   let endHour = startHour;
@@ -248,7 +251,7 @@ export const addSlotBackToAvailability = async (
     endMinute = 0;
   }
 
-  // Time slot mapping for consistency
+  // time slot mapping for consistency
   const TIME_SLOT_MAP = {
     "9:00": 0,
     "9:30": 1,
@@ -270,17 +273,17 @@ export const addSlotBackToAvailability = async (
   const endTime = `${endHour}:${endMinute === 0 ? "00" : "30"}`;
   const startIndex = TIME_SLOT_MAP[start_time];
 
-  // Check for duplicate slot
+  // check for duplicate slot
   const existingIndexes = new Set(currentSlots.map((slot) => slot[2]));
   if (existingIndexes.has(startIndex)) {
     throw new Error(`Slot ${start_time} is already booked`);
   }
 
-  // Add new slot
+  // add new slot
   const newSlot = [start_time, endTime, startIndex];
   const updatedSlots = [...currentSlots, newSlot];
 
-  // Update availability slots
+  // update availability slots
   const query = `
         UPDATE availability 
         SET slots = $1 
@@ -301,17 +304,17 @@ export const addSlotBackToAvailability = async (
 };
 
 export const validateStatusUpdate = (appointmentDetails, newStatus) => {
-  // Prevent changing to pending
+  // prevent changing to pending
   if (newStatus === "pending") {
     throw new Error("Status cannot be changed to pending");
   }
 
-  // Prevent changing from completed or cancelled
+  // prevent changing from completed or cancelled
   if (["completed", "cancelled"].includes(appointmentDetails.status)) {
     throw new Error(`Cannot change status from ${appointmentDetails.status}`);
   }
 
-  // Prevent changing to same status
+  // prevent changing to same status
   if (appointmentDetails.status === newStatus) {
     throw new Error(`Appointment is already ${newStatus}`);
   }

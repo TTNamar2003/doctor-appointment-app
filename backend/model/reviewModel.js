@@ -38,7 +38,7 @@ export const getPaginatedReviews = async (doctorId, pageNo, pageSize = 6) => {
   }
 };
 
-// Get total unreviewed completed appointments count for a specific doctor
+// get total unreviewed completed appointments count for a specific doctor
 export const getTotalUnreviewedAppointments = async (userId, doctorId) => {
   const query = `
       SELECT COUNT(*) AS total_count
@@ -62,7 +62,7 @@ export const getTotalUnreviewedAppointments = async (userId, doctorId) => {
   }
 };
 
-// Fetch paginated unreviewed completed appointments for a doctor
+// fetch paginated unreviewed completed appointments for a doctor
 export const getUnreviewedAppointments = async (
   userId,
   doctorId,
@@ -93,7 +93,6 @@ export const getUnreviewedAppointments = async (
   }
 };
 
-// Function to create a new review
 export const createReview = async (
   doctorId,
   appointmentId,
@@ -101,7 +100,7 @@ export const createReview = async (
   comment
 ) => {
   try {
-    // Get patient_id from appointment
+    // get patient_id from appointment
     const patientQuery = `
           SELECT p.patient_id
           FROM patients p
@@ -119,7 +118,6 @@ export const createReview = async (
 
     const patientId = patientResult.rows[0].patient_id;
 
-    // Insert into reviews table
     const insertQuery = `
           INSERT INTO reviews (appointment_id, patient_id,  doctor_id, rating, comments, created_at)
           VALUES ($1, $2, $3, $4, $5,  NOW())
@@ -143,7 +141,7 @@ export const createReview = async (
             WHERE doctor_id = $1`;
 
     const updateAverage = await db.query(updateAverageQuery, [doctorId]);
-    return result.rows[0]; // Return inserted review
+    return result.rows[0];
   } catch (error) {
     console.error("Error inserting review:", error);
     throw error;

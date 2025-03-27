@@ -6,6 +6,7 @@ import {
   updateAppointmentPatient,
 } from "../model/appointmentModel.js";
 import db from "../config/db.js";
+import { sendNotification } from "../controllers/notificationController.js";
 
 export const bookAppointment = async (req, res) => {
   const { id: doctor_id } = req.params;
@@ -18,9 +19,10 @@ export const bookAppointment = async (req, res) => {
     booking_type,
     shift,
     slot,
+    location,
   } = req.body;
 
-  // **Validate Input**
+  // validate Input
   name = name?.trim();
   gender = gender?.trim();
   health_description = health_description?.trim();
@@ -50,7 +52,7 @@ export const bookAppointment = async (req, res) => {
   try {
     await db.query("BEGIN");
 
-    // **Check Availability**
+    // check Availability
     console.log(doctor_id);
     const availability = await checkAvailability(doctor_id, date, shift);
     if (!availability) {
@@ -66,8 +68,8 @@ export const bookAppointment = async (req, res) => {
       return res.status(400).json({ message: "Slot is not available" });
     }
 
-    // **Create Appointment**
-    const appointment_id = await createAppointment(
+    // create Appointment
+    const appointment_data = await createAppointment(
       doctor_id,
       availability.availability_id,
       slots[slotIndex][0],
@@ -75,23 +77,38 @@ export const bookAppointment = async (req, res) => {
       booking_type
     );
 
-    // **Remove Booked Slot**
+    // remove Booked Slot
     slots.splice(slotIndex, 1);
     await updateAvailability(slots, availability.availability_id);
 
-    // **Insert Patient Info**
+    // insert patient info
     const user_id = req.user.user_id;
     const patient_id = await insertPatient(
       name,
       age,
       gender,
       health_description,
-      appointment_id,
+      appointment_data.appointment_id,
       user_id
     );
-    // await updateAppointmentPatient(patient_id, appointment_id);
+
     await db.query("COMMIT");
-    return res.status(201).json({ message: "Appointment booked successfully" });
+
+    res.status(201).json({ message: "Appointment booked successfully" });
+    console.log("checking");
+    Promise.resolve().then(() =>
+      sendNotification({
+        user_id,
+        appointment_id,
+        doctor_id,
+        booking_type,
+        date,
+        user_email: req.user.email,
+        booking_status: "pending",
+        startTime: appointment_data.start_time,
+        endTime: appointment_data.end_time,
+      })
+    );
   } catch (error) {
     await db.query("ROLLBACK");
     console.error("Error booking appointment:", error);

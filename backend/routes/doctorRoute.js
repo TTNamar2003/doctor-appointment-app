@@ -14,14 +14,14 @@ import {
 
 const router = express.Router();
 
-// Create doctor route
+// create doctor route
 router.use(isAuth);
 router.post("/createDoctor", isAdmin, createDoctor);
 
-// Edit doctor route
+// edit doctor route
 router.patch("/updateDoctor/:doctorId", isAdmin, editDoctor);
 
-// Remove doctor route
+// remove doctor route
 router.delete("/removeDoctor/:doctorId", isAdmin, removeDoctor);
 
 // get all reviewed data

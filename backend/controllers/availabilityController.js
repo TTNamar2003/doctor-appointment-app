@@ -11,12 +11,12 @@ export const addSchedule = async (req, res) => {
         .json({ message: "Missing or invalid required fields" });
     }
 
-    // Validate shift
+    // validate shift
     if (!["morning", "evening"].includes(shift)) {
       return res.status(400).json({ message: "Invalid shift provided" });
     }
 
-    // Define time slot mapping
+    // define time slot mapping
     const timeSlotMap = {
       "9:00": 0,
       "9:30": 1,
@@ -76,7 +76,7 @@ export const addSchedule = async (req, res) => {
 
     const slotData = JSON.stringify(slotsData);
 
-    // **Check if doctor_id, date, shift already exists**
+    // check if doctor_id, date, shift already exists
     const existingSchedule = await DoctorModel.checkExistingSchedule(
       doctor_id,
       date,
@@ -85,7 +85,7 @@ export const addSchedule = async (req, res) => {
     console.log(existingSchedule);
     if (existingSchedule) {
       let existingSlots = existingSchedule.slots || [];
-      // **Check for duplicate slot indices**
+      // check for duplicate slot indices
       const existingIndexes = new Set(existingSlots.map((slot) => slot[2]));
       for (let newSlot of slotsData) {
         if (existingIndexes.has(newSlot[2])) {
@@ -95,7 +95,7 @@ export const addSchedule = async (req, res) => {
         }
       }
 
-      // **Append new slots and update the row**
+      // append new slots and update the row
       const updatedSlots = [...existingSlots, ...slotsData];
       const updatedSlotData = JSON.stringify(updatedSlots);
 
@@ -106,7 +106,7 @@ export const addSchedule = async (req, res) => {
         availability: updatedSlots,
       });
     } else {
-      // **If not exists, insert a new schedule**
+      // if not exists, insert a new schedule
       const scheduleData = { doctor_id, date, shift, slotData };
       await DoctorModel.insertSchedule(scheduleData);
 

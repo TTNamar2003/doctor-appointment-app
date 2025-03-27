@@ -1,7 +1,6 @@
 import db from "../config/db.js";
 
 class DoctorModel {
-  // Create a new doctor
   static async createDoctor(doctorData) {
     const {
       name,
@@ -43,7 +42,7 @@ class DoctorModel {
 
       return result.rows[0];
     } catch (error) {
-      // Handle unique email constraint violation
+      // handle unique email constraint violation
       if (error.code === "23505") {
         throw new Error("Email already exists");
       }
@@ -52,7 +51,6 @@ class DoctorModel {
     }
   }
 
-  // Remove a doctor by ID
   static async removeDoctor(doctorId) {
     const query = "DELETE FROM doctor_details WHERE doctor_id = $1 RETURNING *";
 
@@ -70,7 +68,6 @@ class DoctorModel {
     }
   }
 
-  // Get doctor by ID
   static async getDoctorById(doctorId) {
     console.log(doctorId);
     const query = "SELECT * FROM doctor_details WHERE doctor_id = $1";
@@ -89,7 +86,6 @@ class DoctorModel {
     }
   }
 
-  // Update doctor details
   static async updateDoctor(doctorId, updateData) {
     const {
       name,
@@ -101,15 +97,6 @@ class DoctorModel {
       photo_url,
       location,
     } = updateData;
-
-    // Validate inputs if provided
-    // if (name && !validateName(name)) {
-    //     throw new Error('Invalid name format');
-    // }
-
-    // if (email && !validateEmail(email)) {
-    //     throw new Error('Invalid email format');
-    // }
 
     const query = `
               UPDATE doctor_details
@@ -146,7 +133,7 @@ class DoctorModel {
 
       return result.rows[0];
     } catch (error) {
-      // Handle unique email constraint violation
+      // handle unique email constraint violation
       if (error.code === "23505") {
         throw new Error("Email already exists");
       }
@@ -161,7 +148,7 @@ class DoctorModel {
 
       const { doctor_id, date, shift, slotData } = scheduleData;
 
-      // Parse slotData from string to JSON object
+      // parse slotData from string to JSON object
       const slots = JSON.parse(slotData);
 
       const insertQuery = `
@@ -175,7 +162,7 @@ class DoctorModel {
         doctor_id,
         date,
         shift,
-        JSON.stringify(slots), // Ensure it's stored as JSON
+        JSON.stringify(slots),
       ]);
 
       await db.query("COMMIT");
@@ -259,34 +246,34 @@ const buildDoctorQuery = (filters, countOnly = false) => {
   const values = [];
   let index = 1;
 
-  // Specialty Filter (Partial Match)
+  // specialty filter
   if (filters.specialty) {
     query += ` AND EXISTS (SELECT 1 FROM unnest(specialty) AS d WHERE d ILIKE $${index})`;
-    values.push(`%${filters.specialty}%`); // Correct use of ILIKE for partial match
+    values.push(`%${filters.specialty}%`);
     index++;
   }
-  // Disease Filter (Partial Match)
+  // disease Filter
   if (filters.disease) {
     query += ` AND EXISTS (SELECT 1 FROM unnest(disease) AS d WHERE d ILIKE $${index})`;
-    values.push(`%${filters.disease}%`); // Correct use of ILIKE for partial match
+    values.push(`%${filters.disease}%`);
     index++;
   }
 
-  // Doctor Name (Partial Match)
+  // doctor name
   if (filters.name) {
     query += ` AND name ILIKE $${index}`;
     values.push(`%${filters.name}%`);
     index++;
   }
 
-  // Gender Filter (Skip if "All")
+  // gender Filter , skip if all present
   if (filters.gender && filters.gender.toLowerCase() !== "all") {
     query += ` AND gender = $${index}`;
     values.push(filters.gender);
     index++;
   }
 
-  // Rating Filter (Skip if "All")
+  // rating filter , skip if all present
   console.log("rating : ", filters.rating);
   if (filters.rating) {
     query += ` AND average_rating = $${index}`;
@@ -294,7 +281,7 @@ const buildDoctorQuery = (filters, countOnly = false) => {
     index++;
   }
 
-  // Experience Filter (Handles "All" and Range)
+  // experience filter, skip if all present
   if (filters.experience && filters.experience.toLowerCase() !== "all") {
     if (filters.experience.includes("-")) {
       const [minExp, maxExp] = filters.experience.split("-").map(Number);
@@ -308,7 +295,7 @@ const buildDoctorQuery = (filters, countOnly = false) => {
     }
   }
 
-  // Sorting (Default: Rating Descending if No Filters)
+  // sorting (Default: Rating Descending if No Filters)
   if (!countOnly) {
     query += ` ORDER BY average_rating DESC`;
   }

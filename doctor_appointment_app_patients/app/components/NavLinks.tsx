@@ -1,14 +1,37 @@
+"use client";
+import React from "react";
 import Link from "next/link";
-import styles from "@/app/styles/NavLinks.module.css"; // Adjust the path if needed
+import { useParams, usePathname } from "next/navigation";
+import styles from "@/app/styles/NavLinks.module.css";
 
 export default function NavLinks() {
+  const { id } = useParams();
+  const pathname = usePathname();
+
+  const isDoctorProfile = /^\/doctors\/\d+$/.test(pathname);
+
   return (
     <div className={styles.navLinks_container}>
       <ul>
-        <li className={styles.home}><Link href="#">Home</Link></li>
-        <li><Link href="#">Appointment</Link></li>
-        <li><Link href="#">Health Blog</Link></li>
-        <li><Link href="#">Reviews</Link></li>
+        <li className={styles.home}>
+          <Link href="/">Home</Link>
+        </li>
+        <li>
+          <Link href="/doctors">Doctors</Link>
+        </li>
+        {isDoctorProfile && (
+          <>
+            <li>
+              <Link href={`/doctor/${id}/appointment`}>Appointment</Link>
+            </li>
+            <li>
+              <Link href={`/doctor/${id}/reviews`}>Reviews</Link>
+            </li>
+          </>
+        )}
+        <li>
+          <Link href="/help">Help</Link>
+        </li>
       </ul>
     </div>
   );

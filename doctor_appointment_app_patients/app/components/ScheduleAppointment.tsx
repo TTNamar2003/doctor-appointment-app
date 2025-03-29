@@ -2,13 +2,27 @@
 import React from "react";
 import styles from "@/app/styles/ScheduleAppointment.module.css";
 import Image from "next/image";
-
 import sun from "@/public/images/sun.svg";
 import sunset from "@/public/images/sunset.svg";
 import leftArrowIcon from "@/public/images/leftArrowIcon.png";
 import rightArrowIcon from "@/public/images/rightArrowIcon.png";
-import { useState } from "react";
-export default function ScheduleAppointment() {
+import { useState, Dispatch, SetStateAction } from "react";
+
+interface PatientInfo {
+  name: string;
+  age: number;
+  gender: "male" | "female";
+  healthDescription: string;
+}
+
+interface PatientProps {
+  setPatientFormFill: Dispatch<SetStateAction<boolean>>;
+  patientInfo: PatientInfo;
+}
+export default function ScheduleAppointment({
+  setPatientFormFill,
+  patientInfo,
+}: PatientProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [startDate, setStartDate] = useState(new Date());
 

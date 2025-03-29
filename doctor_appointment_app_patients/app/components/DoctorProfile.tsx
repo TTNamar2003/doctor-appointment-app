@@ -9,8 +9,15 @@ import experience from "@/public/images/hourGlass.svg";
 import gender from "@/public/images/gender.svg";
 import sun from "@/public/images/sun.svg";
 import sunset from "@/public/images/sunset.svg";
+import { useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 
 export default function DoctorProfile() {
+  const router = useRouter();
+  const { id } = useParams();
+  function handleNavigate() {
+    router.push(`/doctors/${id}/appointment`);
+  }
   const [selectedDate, setSelectedDate] = useState(new Date());
   const today = new Date();
   const formattedDate = selectedDate.toLocaleDateString("en-US", {
@@ -51,7 +58,10 @@ export default function DoctorProfile() {
             <Image src={experience} alt="experience" height={20} width={20} />
             <span>9 Years Experience</span>
           </div>
-          <button className={styles.book_appointment_btn}>
+          <button
+            className={styles.book_appointment_btn}
+            onClick={handleNavigate}
+          >
             Book Appointment
           </button>
         </div>
@@ -112,7 +122,6 @@ export default function DoctorProfile() {
           </div>
         </div>
 
-        {/* Available Slots Section */}
         <div className={styles.detail_section}>
           <div className={styles.slots_header}>
             <h3>Available Slots</h3>

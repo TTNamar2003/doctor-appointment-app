@@ -6,11 +6,10 @@
   gap: 16px;
   background-color: #ffffff;
   width: 80%;
-  height: 90%;
-  padding: 20px 12px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 24px 16px;
+  margin: auto auto;
   overflow-y: auto;
+  max-height: fit-content;
 }
 
 .appointment_div {
@@ -21,7 +20,6 @@
 }
 
 .appointment_div div:first-child {
-  margin-top: 60px;
   display: flex;
   flex-direction: row;
   justify-content: space-between;

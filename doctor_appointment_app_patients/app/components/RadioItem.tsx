@@ -1,17 +1,23 @@
 import React from 'react'
 import styles from '@/app/styles/RadioItem.module.css'
 
-interface RadioItemPorps {
-    radioName :string,
-    idName : string,
-    name: string
+interface RadioItemProps {
+    radioName: string;
+    idName: string;
+    name: string;
+    onChange: () => void;
 }
-export default function RadioItem({radioName,idName,name}:RadioItemPorps) {
-  return (
-    <div className={styles.radioItem_container}>
-        <input type="radio" id={idName} name={name}/>
-        <label htmlFor={idName}>{radioName}</label>
-        
-    </div>
-  )
+
+export default function RadioItem({ radioName, idName, name, onChange }: RadioItemProps) {
+    return (
+        <div className={styles.radio_container}>
+            <input
+                type="radio"
+                id={idName}
+                name={name}
+                onChange={onChange}
+            />
+            <label htmlFor={idName}>{radioName}</label>
+        </div>
+    );
 }

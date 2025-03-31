@@ -68,7 +68,7 @@ export const patchAppointmentStatus = async (req, res) => {
   try {
     const { appointment_id } = req.params;
     const { status, start_time } = req.body;
-
+    console.log(req.body);
     // validate input
     if (!appointment_id) {
       return res.status(400).json({ error: "Appointment ID is required" });

@@ -1,10 +1,10 @@
 import DoctorModel from "../model/doctorModel.js";
-
+import { getAvailabilityByDate } from "../model/appointmentModel.js";
 export const addSchedule = async (req, res) => {
   try {
     const { date, shift, slot } = req.body;
     const doctor_id = req.params.doctorId;
-
+    console.log("body: ", req.body);
     if (!doctor_id || !date || !shift || !slot || !Array.isArray(slot.start)) {
       return res
         .status(400)
@@ -118,5 +118,25 @@ export const addSchedule = async (req, res) => {
   } catch (error) {
     console.error("Error adding schedule:", error);
     return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const fetchAvailabilityByDate = async (req, res) => {
+  try {
+    const { doctor_id, date } = req.query;
+
+    if (!doctor_id || !date) {
+      return res.status(400).json({ error: "doctor_id and date are required" });
+    }
+
+    const availability = await getAvailabilityByDate(doctor_id, date);
+
+    if (availability.length === 0) {
+      return res.status(404).json({ message: "No availability found" });
+    }
+
+    res.json({ success: true, data: availability });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };

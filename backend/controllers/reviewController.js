@@ -37,7 +37,8 @@ export const getDoctorReviews = async (req, res) => {
 
 export const getUnreviewedCompletedAppointments = async (req, res) => {
   try {
-    const { id: doctorId, user_id: userId } = req.params;
+    const { id: doctorId } = req.params;
+    const userId = req.user.user_id;
     console.log(req.params);
     const { pageNo = 1 } = req.query;
 
@@ -78,13 +79,11 @@ export const getUnreviewedCompletedAppointments = async (req, res) => {
 
 export const postReview = async (req, res) => {
   try {
-    const {
-      id: doctorId,
-      user_id: userId,
-      appointment_id: appointmentId,
-    } = req.params;
+    const { id: doctorId, appointment_id: appointmentId } = req.params;
+    const userId = req.user.user_id;
     const { rating, comment } = req.body;
-
+    console.log(req.params);
+    console.log(req.body);
     // validate inputs
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ error: "Rating must be between 1 and 5." });

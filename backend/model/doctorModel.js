@@ -11,22 +11,28 @@ class DoctorModel {
       biography,
       photo_url,
       location,
+      specialty,
+      disease,
+      gender,
     } = doctorData;
 
     const query = `
-              INSERT INTO doctor_details (
-                  name,
-                  email,
-                  average_rating, 
-                  experience_year, 
-                  degree, 
-                  biography, 
-                  photo_url, 
-                  location
-              ) VALUES (
-                  $1, $2, $3, $4, $5, $6, $7, $8
-              ) RETURNING doctor_id, created_at
-          `;
+  INSERT INTO doctor_details (
+      name,
+      email,
+      average_rating, 
+      experience_year, 
+      degree, 
+      biography, 
+      photo_url, 
+      location,
+      specialty,
+      disease,
+      gender
+  ) VALUES (
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11
+  ) RETURNING doctor_id, created_at
+`;
 
     try {
       const result = await db.query(query, [
@@ -38,6 +44,9 @@ class DoctorModel {
         biography,
         photo_url,
         location,
+        specialty,
+        disease,
+        gender,
       ]);
 
       return result.rows[0];
@@ -96,23 +105,29 @@ class DoctorModel {
       biography,
       photo_url,
       location,
+      specialty,
+      disease,
+      gender,
     } = updateData;
 
     const query = `
-              UPDATE doctor_details
-              SET 
-                  name = COALESCE($1, name),
-                  email = COALESCE($2, email),
-                  average_rating = COALESCE($3, average_rating),
-                  experience_year = COALESCE($4, experience_year),
-                  degree = COALESCE($5, degree),
-                  biography = COALESCE($6, biography),
-                  photo_url = COALESCE($7, photo_url),
-                  location = COALESCE($8, location),
-                  updated_at = CURRENT_TIMESTAMP
-              WHERE doctor_id = $9
-              RETURNING *
-          `;
+    UPDATE doctor_details
+    SET 
+        name = COALESCE($1, name),
+        email = COALESCE($2, email),
+        average_rating = COALESCE($3, average_rating),
+        experience_year = COALESCE($4, experience_year),
+        degree = COALESCE($5, degree),
+        biography = COALESCE($6, biography),
+        photo_url = COALESCE($7, photo_url),
+        location = COALESCE($8, location),
+        specialty = COALESCE($9, specialty),
+        disease = COALESCE($10, disease),
+        gender = COALESCE($11, gender),
+        updated_at = CURRENT_TIMESTAMP
+    WHERE doctor_id = $12
+    RETURNING *;
+  `;
 
     try {
       const result = await db.query(query, [
@@ -124,6 +139,9 @@ class DoctorModel {
         biography,
         photo_url,
         location,
+        specialty,
+        disease,
+        gender,
         doctorId,
       ]);
 
@@ -246,42 +264,53 @@ const buildDoctorQuery = (filters, countOnly = false) => {
   const values = [];
   let index = 1;
 
-  // specialty filter
+  console.log(filters);
+
+  // handling Name, Specialty, and Disease as OR condition inside parentheses
+  let searchConditions = [];
+
   if (filters.specialty) {
-    query += ` AND EXISTS (SELECT 1 FROM unnest(specialty) AS d WHERE d ILIKE $${index})`;
+    searchConditions.push(
+      `EXISTS (SELECT 1 FROM unnest(specialty) AS s WHERE s ILIKE $${index})`
+    );
     values.push(`%${filters.specialty}%`);
     index++;
   }
-  // disease Filter
+
   if (filters.disease) {
-    query += ` AND EXISTS (SELECT 1 FROM unnest(disease) AS d WHERE d ILIKE $${index})`;
+    searchConditions.push(
+      `EXISTS (SELECT 1 FROM unnest(disease) AS d WHERE d ILIKE $${index})`
+    );
     values.push(`%${filters.disease}%`);
     index++;
   }
 
-  // doctor name
-  if (filters.name) {
-    query += ` AND name ILIKE $${index}`;
-    values.push(`%${filters.name}%`);
+  if (filters.doctor_name) {
+    searchConditions.push(`name ILIKE $${index}`);
+    values.push(`%${filters.doctor_name}%`);
     index++;
   }
 
-  // gender Filter , skip if all present
+  // apply OR conditions correctly by grouping them in parentheses
+  if (searchConditions.length > 0) {
+    query += ` AND (${searchConditions.join(" OR ")})`;
+  }
+
+  // gender Filter, skip if "all"
   if (filters.gender && filters.gender.toLowerCase() !== "all") {
     query += ` AND gender = $${index}`;
     values.push(filters.gender);
     index++;
   }
 
-  // rating filter , skip if all present
-  console.log("rating : ", filters.rating);
+  // rating Filter
   if (filters.rating) {
     query += ` AND average_rating = $${index}`;
     values.push(parseFloat(filters.rating));
     index++;
   }
 
-  // experience filter, skip if all present
+  // experience Filter, skip if "all"
   if (filters.experience && filters.experience.toLowerCase() !== "all") {
     if (filters.experience.includes("-")) {
       const [minExp, maxExp] = filters.experience.split("-").map(Number);
@@ -295,7 +324,7 @@ const buildDoctorQuery = (filters, countOnly = false) => {
     }
   }
 
-  // sorting (Default: Rating Descending if No Filters)
+  // sorting
   if (!countOnly) {
     query += ` ORDER BY average_rating DESC`;
   }

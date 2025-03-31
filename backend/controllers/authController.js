@@ -60,7 +60,7 @@ export const signup = async (req, res) => {
     // set token in HTTP cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: "none",
       maxAge: 2 * 24 * 60 * 60 * 1000,
     });
@@ -117,7 +117,7 @@ export const login = async (req, res) => {
     // set token in HTTP cookie
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false,
+      secure: true,
       sameSite: "none",
       maxAge: 2 * 24 * 60 * 60 * 1000,
     });
@@ -133,10 +133,26 @@ export const login = async (req, res) => {
 // logout controller
 export const logout = (req, res) => {
   // clear JWT cookie
-  res.cookie("jwt", "", {
+  res.cookie("token", "", {
     maxAge: 1,
     httpOnly: true,
   });
 
   res.status(200).json({ message: "Logged out successfully" });
+};
+
+export const checkAlreadyLoggedIn = (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "User is already logged in",
+      user: req.user,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
 };

@@ -74,6 +74,29 @@ const commonValidations = {
     Joi.string().max(1000).allow(null).optional().messages({
       "string.max": "Text must be less than 1000 characters",
     }),
+  specialty: () =>
+    Joi.array()
+      .items(Joi.string().max(255)) // Adjust max length if needed
+      .optional()
+      .messages({
+        "array.base": "Specialty must be an array of strings",
+        "string.max": "Each specialty must be less than 255 characters",
+      }),
+
+  disease: () =>
+    Joi.array()
+      .items(Joi.string().max(255)) // Adjust max length if needed
+      .optional()
+      .messages({
+        "array.base": "Disease must be an array of strings",
+        "string.max": "Each disease must be less than 255 characters",
+      }),
+  gender: () =>
+    Joi.string().valid("Male", "Female").required().messages({
+      "any.only": "Gender must be either Male or Female",
+      "string.empty": "Gender is required",
+      "any.required": "Gender is required",
+    }),
 };
 
 // Validation schemas
@@ -101,6 +124,9 @@ export const doctorSchema = Joi.object({
   photo_url: commonValidations.optionalUrl(),
   location: Joi.string().optional().allow(null),
   average_rating: commonValidations.rating().optional(),
+  specialty: commonValidations.specialty(),
+  disease: commonValidations.disease(),
+  gender: commonValidations.gender().required(),
 });
 
 // Validation helpers

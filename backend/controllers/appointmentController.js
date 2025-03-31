@@ -26,7 +26,7 @@ export const bookAppointment = async (req, res) => {
   name = name?.trim();
   gender = gender?.trim();
   health_description = health_description?.trim();
-
+  console.log(req.body);
   if (
     !name ||
     !gender ||
@@ -81,14 +81,17 @@ export const bookAppointment = async (req, res) => {
     slots.splice(slotIndex, 1);
     await updateAvailability(slots, availability.availability_id);
 
+    console.log(appointment_data);
+    console.log(appointment_data.appointment_id);
     // insert patient info
+    const appointment_id = appointment_data.appointment_id;
     const user_id = req.user.user_id;
     const patient_id = await insertPatient(
       name,
       age,
       gender,
       health_description,
-      appointment_data.appointment_id,
+      appointment_id,
       user_id
     );
 

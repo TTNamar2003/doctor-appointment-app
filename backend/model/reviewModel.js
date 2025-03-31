@@ -117,7 +117,6 @@ export const createReview = async (
     }
 
     const patientId = patientResult.rows[0].patient_id;
-
     const insertQuery = `
           INSERT INTO reviews (appointment_id, patient_id,  doctor_id, rating, comments, created_at)
           VALUES ($1, $2, $3, $4, $5,  NOW())
@@ -131,16 +130,19 @@ export const createReview = async (
       comment,
     ]);
 
-    const updateAverageQuery = `
-           SET average_rating = CAST(ROUND(
-            (
-                COALESCE((SELECT AVG(rating)::NUMERIC FROM reviews WHERE doctor_id = doctor_details.doctor_id), 0) 
-                + average_rating::NUMERIC
-                        ) / 2, 
-            1) AS FLOAT)
-            WHERE doctor_id = $1`;
+    const updateAverageRatingQuery = `
+UPDATE doctor_details d
+SET average_rating = 
+    ROUND(
+        (COALESCE(d.average_rating::NUMERIC, 0) + 
+        COALESCE((SELECT AVG(r.rating)::NUMERIC FROM reviews r WHERE r.doctor_id = d.doctor_id), 0)) / 2, 
+        1
+    )::FLOAT
+WHERE d.doctor_id = $1
+RETURNING average_rating;
+`;
 
-    const updateAverage = await db.query(updateAverageQuery, [doctorId]);
+    const updateAverage = await db.query(updateAverageRatingQuery, [doctorId]);
     return result.rows[0];
   } catch (error) {
     console.error("Error inserting review:", error);

@@ -24,6 +24,9 @@ export const createDoctor = async (req, res) => {
       photo_url,
       location,
       average_rating,
+      specialty,
+      disease,
+      gender,
     } = req.body;
 
     // prepare the doctor data
@@ -36,8 +39,11 @@ export const createDoctor = async (req, res) => {
       photo_url: photo_url || null,
       location: location || null,
       average_rating: average_rating || 0,
+      specialty,
+      disease,
+      gender,
     };
-
+    console.log(doctorData);
     // create doctor
     const newDoctor = await DoctorModel.createDoctor(doctorData);
 
@@ -104,6 +110,9 @@ export const editDoctor = async (req, res) => {
       "photo_url",
       "location",
       "average_rating",
+      "speciality",
+      "disease",
+      "gender",
     ];
 
     allowedFields.forEach((field) => {
@@ -231,16 +240,13 @@ export const getDoctorDetail = async (req, res) => {
 export const searchDoctors = async (req, res) => {
   try {
     // extract query parameters
-    const {
-      gender,
-      experience,
-      rating,
-      doctor_name,
-      specialty,
-      disease,
-      pageNo = 1,
-    } = req.query;
+    const { gender, experience, rating, search, pageNo = 1 } = req.query;
 
+    const doctor_name = search;
+    const specialty = search;
+    const disease = search;
+    console.log("---------");
+    console.log(doctor_name, specialty, disease);
     const filters = {
       gender,
       experience: experience,

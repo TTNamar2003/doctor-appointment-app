@@ -16,6 +16,24 @@ export const checkAvailability = async (doctor_id, date, shift) => {
   }
 };
 
+export const getAvailabilityByDate = async (doctorId, date) => {
+  try {
+    const query = `
+      SELECT shift, slots 
+      FROM availability 
+      WHERE doctor_id = $1 AND date = $2
+    `;
+    const values = [doctorId, date];
+
+    const { rows } = await db.query(query, values);
+
+    return rows;
+  } catch (error) {
+    console.error("Error fetching availability:", error);
+    throw new Error("Database query failed");
+  }
+};
+
 export const getAvailabilityData = async (availability_id) => {
   try {
     const query = `
@@ -50,7 +68,7 @@ export const createAppointment = async (
       end_time,
       booking_type,
     ]);
-    return result.rows[0].appointment_id;
+    return result.rows[0];
   } catch (error) {
     console.error("Error inserting appointment:", error);
     throw new Error("Database error");

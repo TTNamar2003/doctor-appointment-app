@@ -51,6 +51,7 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [initialTotalPages, setInitialTotalPages] = useState(1);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -92,6 +93,11 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
         });
         console.log('Mapped doctors result:', mappedDoctors);
         setDoctors(mappedDoctors);
+        
+        // Store initial totalPages only on first load
+        if (page === 1) {
+          setInitialTotalPages(data.totalPages);
+        }
       } else {
         console.log('No data in fetch response');
         setDoctors([]);
@@ -202,9 +208,9 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
         )}
       </div>
 
-      {!searchQuery && totalPages > 1 && (
+      {!searchQuery && initialTotalPages > 1 && (
         <div className={styles.pagination}>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {Array.from({ length: initialTotalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => fetchDoctors(page)}

@@ -46,6 +46,7 @@ export default function AddSchedule() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [initialTotalPages, setInitialTotalPages] = useState(1);
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [showScheduleForm, setShowScheduleForm] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -80,6 +81,11 @@ export default function AddSchedule() {
           gender: doctor.gender
         }));
         setDoctors(mappedDoctors);
+        
+        // Store initial totalPages only on first load
+        if (page === 1) {
+          setInitialTotalPages(data.totalPages);
+        }
       } else {
         setDoctors([]);
       }
@@ -128,23 +134,20 @@ export default function AddSchedule() {
         ) : (
           doctors.map((doctor) => (
             <DoctorCard
-              key={doctor.doctor_id}
+              key={`schedule-${doctor.doctor_id}`}
               doctor={doctor}
-              onAddSchedule={(doctor_id) => {
-                const selectedDoctor = doctors.find(d => d.doctor_id === doctor_id);
-                if (selectedDoctor) {
-                  setSelectedDoctor(selectedDoctor);
-                  setShowScheduleForm(true);
-                }
+              onAddSchedule={() => {
+                setSelectedDoctor(doctor);
+                setShowScheduleForm(true);
               }}
             />
           ))
         )}
       </div>
 
-      {!searchQuery && totalPages > 1 && (
+      {initialTotalPages > 1 && (
         <div className={styles.pagination}>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {Array.from({ length: initialTotalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => fetchDoctors(page)}
@@ -164,6 +167,11 @@ export default function AddSchedule() {
           onClose={() => {
             setShowScheduleForm(false);
             setSelectedDoctor(null);
+          }}
+          onSuccess={() => {
+            setShowScheduleForm(false);
+            setSelectedDoctor(null);
+            fetchDoctors(currentPage);
           }}
         />
       )}

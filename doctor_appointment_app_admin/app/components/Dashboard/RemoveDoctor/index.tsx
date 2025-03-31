@@ -49,6 +49,7 @@ export default function RemoveDoctor() {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
+  const [initialTotalPages, setInitialTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
 
   const fetchDoctors = async (page: number = 1) => {
@@ -87,12 +88,17 @@ export default function RemoveDoctor() {
         });
         console.log('Mapped doctors result:', mappedDoctors);
         setDoctors(mappedDoctors);
-        setTotalPages(data.totalPages);
-        setCurrentPage(data.currentPage);
+        
+        // Store initial totalPages only on first load
+        if (page === 1) {
+          setInitialTotalPages(data.totalPages);
+        }
       } else {
         console.log('No data in fetch response');
         setDoctors([]);
       }
+      
+      setCurrentPage(data.currentPage);
     } catch (error) {
       console.error('Error fetching doctors:', error);
       setDoctors([]);
@@ -165,9 +171,9 @@ export default function RemoveDoctor() {
         )}
       </div>
 
-      {!searchQuery && totalPages > 1 && (
+      {!searchQuery && initialTotalPages > 1 && (
         <div className={styles.pagination}>
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+          {Array.from({ length: initialTotalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
               onClick={() => fetchDoctors(page)}

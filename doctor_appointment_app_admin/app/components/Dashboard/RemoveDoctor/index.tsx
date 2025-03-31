@@ -7,7 +7,8 @@ import DoctorCard from '../EditDoctor/DoctorCard';
 import DoctorSearch from '../EditDoctor/DoctorSearch';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -70,6 +71,7 @@ export default function RemoveDoctor() {
           console.log('Mapping doctor:', doctor);
           return {
             _id: doctor.doctor_id,
+            doctor_id: doctor.doctor_id,
             name: doctor.name,
             email: doctor.email,
             average_rating: doctor.average_rating,
@@ -112,8 +114,9 @@ export default function RemoveDoctor() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/doctor/${doctor._id}`, {
+      const response = await fetch(`http://localhost:5000/removeDoctor/${doctor.doctor_id}`, {
         method: 'DELETE',
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -153,7 +156,7 @@ export default function RemoveDoctor() {
         ) : (
           doctors.map((doctor) => (
             <DoctorCard
-              key={doctor._id}
+              key={`remove-${doctor.doctor_id}`}
               doctor={doctor}
               onEdit={() => handleRemoveDoctor(doctor)}
               isRemoveMode={true}

@@ -6,7 +6,8 @@ import EditModal from './EditModal';
 import DoctorSearch from './DoctorSearch';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -75,6 +76,7 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
           console.log('Mapping doctor:', doctor);
           return {
             _id: doctor.doctor_id,
+            doctor_id: doctor.doctor_id,
             name: doctor.name,
             email: doctor.email,
             average_rating: doctor.average_rating,
@@ -135,7 +137,7 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
       }
 
       setDoctors(doctors.map(doc => 
-        doc._id === doctorId ? { ...doc, ...updatedData } : doc
+        doc.doctor_id === doctorId ? { ...doc, ...updatedData } : doc
       ));
 
       setShowEditModal(false);
@@ -189,7 +191,7 @@ export default function EditDoctor({ onDoctorUpdated }: EditDoctorProps) {
         ) : (
           doctors.map((doctor) => (
             <DoctorCard
-              key={doctor._id}
+              key={`edit-${doctor.doctor_id}`}
               doctor={doctor}
               onEdit={() => {
                 setSelectedDoctor(doctor);

@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import DoctorCard from './DoctorCard';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -19,7 +20,7 @@ interface Doctor {
 
 interface DoctorSearchProps {
   searchQuery: string;
-  onSelectDoctor?: (doctor: Doctor) => void;
+  onSelectDoctor?: (doctor_id: string) => void;
 }
 
 export default function DoctorSearch({ searchQuery, onSelectDoctor }: DoctorSearchProps) {
@@ -63,13 +64,17 @@ export default function DoctorSearch({ searchQuery, onSelectDoctor }: DoctorSear
 
   return (
     <>
-      {searchResults.map((doctor) => (
-        <DoctorCard
-          key={doctor._id}
-          doctor={doctor}
-          onAddSchedule={() => onSelectDoctor?.(doctor)}
-        />
-      ))}
+      {searchResults.map((doctor) => {
+        console.log('working Doctor data:', doctor);
+        console.log('working Doctor id: -------', doctor.doctor_id);
+        return (
+          <DoctorCard
+            key={`search-${doctor.doctor_id}`}
+            doctor={doctor}
+            onAddSchedule={() => onSelectDoctor?.(doctor.doctor_id)}
+          />
+        );
+      })}
     </>
   );
 } 

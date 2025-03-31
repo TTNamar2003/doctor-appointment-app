@@ -43,10 +43,13 @@ export default function CreateDoctor() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(formData),
         credentials: 'include',
       });
+
+      const data = await response.json();
 
       if (response.ok) {
         setMessage('Doctor created successfully!');
@@ -64,7 +67,7 @@ export default function CreateDoctor() {
           gender: '',
         });
       } else {
-        setMessage('Failed to create doctor. Please try again.');
+        setMessage(`Failed to create doctor: ${data.message || 'Please try again.'}`);
       }
     } catch (error) {
       setMessage('Error creating doctor. Please try again.');

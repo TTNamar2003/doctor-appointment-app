@@ -2,7 +2,8 @@ import { useState } from 'react';
 import styles from '@/app/styles/DoctorCard.module.css';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -18,7 +19,7 @@ interface Doctor {
 
 interface DoctorCardProps {
   doctor: Doctor;
-  onAddSchedule: () => void;
+  onAddSchedule: (doctor_id: string) => void;
 }
 
 export default function DoctorCard({ doctor, onAddSchedule }: DoctorCardProps) {
@@ -73,7 +74,7 @@ export default function DoctorCard({ doctor, onAddSchedule }: DoctorCardProps) {
 
       <div className={styles.cardFooter}>
         <button 
-          onClick={onAddSchedule}
+          onClick={() => onAddSchedule(doctor.doctor_id)}
           className={`${styles.editButton} ${styles.scheduleButton}`}
         >
           Add Schedule

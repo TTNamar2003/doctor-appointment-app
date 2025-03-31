@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import DoctorCard from './DoctorCard';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -45,7 +46,25 @@ export default function DoctorSearch({ searchQuery, onSelectDoctor, isRemoveMode
           }
         );
         const data = await response.json();
-        setSearchResults(data.data || []);
+        
+        // Map the data to include both _id and doctor_id
+        const mappedDoctors = data.data.map((doctor: any) => ({
+          _id: doctor.doctor_id,
+          doctor_id: doctor.doctor_id,
+          name: doctor.name,
+          email: doctor.email,
+          average_rating: doctor.average_rating,
+          experience_year: doctor.experience_year,
+          degree: doctor.degree,
+          biography: doctor.biography,
+          photo_url: doctor.photo_url,
+          location: doctor.location,
+          specialty: doctor.specialty,
+          disease: doctor.disease,
+          gender: doctor.gender
+        }));
+        
+        setSearchResults(mappedDoctors);
       } catch (error) {
         console.error('Error searching doctors:', error);
       } finally {
@@ -67,7 +86,7 @@ export default function DoctorSearch({ searchQuery, onSelectDoctor, isRemoveMode
     <>
       {searchResults.map((doctor) => (
         <DoctorCard
-          key={`search-${doctor._id}`}
+          key={`search-${doctor.doctor_id}`}
           doctor={doctor}
           onEdit={() => onSelectDoctor?.(doctor)}
           isRemoveMode={isRemoveMode}

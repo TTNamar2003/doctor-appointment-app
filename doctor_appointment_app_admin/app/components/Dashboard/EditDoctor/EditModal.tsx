@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import styles from '@/app/styles/EditModal.module.css';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -59,7 +60,7 @@ export default function EditModal({ isOpen, onClose, doctor, onUpdate }: EditMod
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(doctor._id, formData);
+    onUpdate(doctor.doctor_id, formData);
   };
 
   const handleAddSpecialty = (e: React.FormEvent) => {

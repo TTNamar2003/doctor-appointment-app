@@ -5,7 +5,8 @@ import DoctorSearch from './DoctorSearch';
 import ScheduleForm from './ScheduleForm';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;
@@ -65,6 +66,7 @@ export default function AddSchedule() {
       if (data?.data) {
         const mappedDoctors = data.data.map((doctor: DoctorResponse) => ({
           _id: doctor.doctor_id,
+          doctor_id: doctor.doctor_id,
           name: doctor.name,
           email: doctor.email,
           average_rating: doctor.average_rating,
@@ -102,7 +104,6 @@ export default function AddSchedule() {
       <h2 className={styles.title}>Add Doctor Schedule</h2>
       
       <div className={styles.searchContainer}>
-        {/* <span className={styles.searchIcon}>🔍</span> */}
         <input
           type="text"
           placeholder="Search doctors by name..."
@@ -116,19 +117,25 @@ export default function AddSchedule() {
         {searchQuery ? (
           <DoctorSearch 
             searchQuery={searchQuery}
-            onSelectDoctor={(doctor) => {
-              setSelectedDoctor(doctor);
-              setShowScheduleForm(true);
+            onSelectDoctor={(doctor_id) => {
+              const doctor = doctors.find(d => d.doctor_id === doctor_id);
+              if (doctor) {
+                setSelectedDoctor(doctor);
+                setShowScheduleForm(true);
+              }
             }}
           />
         ) : (
           doctors.map((doctor) => (
             <DoctorCard
-              key={doctor._id}
+              key={doctor.doctor_id}
               doctor={doctor}
-              onAddSchedule={() => {
-                setSelectedDoctor(doctor);
-                setShowScheduleForm(true);
+              onAddSchedule={(doctor_id) => {
+                const selectedDoctor = doctors.find(d => d.doctor_id === doctor_id);
+                if (selectedDoctor) {
+                  setSelectedDoctor(selectedDoctor);
+                  setShowScheduleForm(true);
+                }
               }}
             />
           ))

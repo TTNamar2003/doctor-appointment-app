@@ -2,7 +2,8 @@ import { useState } from 'react';
 import styles from '@/app/styles/DoctorCard.module.css';
 
 interface Doctor {
-  _id: string;
+  _id?: string;
+  doctor_id: string;
   name: string;
   email: string;
   average_rating: number;

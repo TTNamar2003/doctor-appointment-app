@@ -91,7 +91,7 @@ export default function ScheduleForm({ doctor, onClose }: ScheduleFormProps) {
           date: String(date),
           shift: String(shift),
           slot: {
-            start: selectedTimes
+            "start": selectedTimes
           }
         }),
         credentials: 'include'

@@ -1,4 +1,5 @@
 import DoctorModel from "../model/doctorModel.js";
+import { timeSlotMap } from "../utils/timeSlot.js";
 import { getAvailabilityByDate } from "../model/appointmentModel.js";
 export const addSchedule = async (req, res) => {
   try {
@@ -17,24 +18,24 @@ export const addSchedule = async (req, res) => {
     }
 
     // define time slot mapping
-    const timeSlotMap = {
-      "9:00": 0,
-      "9:30": 1,
-      "10:00": 2,
-      "10:30": 3,
-      "11:00": 4,
-      "11:30": 5,
-      "12:00": 6,
-      "12:30": 7,
-      "14:00": 8,
-      "14:30": 9,
-      "15:00": 10,
-      "15:30": 11,
-      "16:00": 12,
-      "16:30": 13,
-      "17:00": 14,
-      "17:30": 15,
-    };
+    // const timeSlotMap = {
+    //   "9:00": 0,
+    //   "9:30": 1,
+    //   "10:00": 2,
+    //   "10:30": 3,
+    //   "11:00": 4,
+    //   "11:30": 5,
+    //   "12:00": 6,
+    //   "12:30": 7,
+    //   "14:00": 8,
+    //   "14:30": 9,
+    //   "15:00": 10,
+    //   "15:30": 11,
+    //   "16:00": 12,
+    //   "16:30": 13,
+    //   "17:00": 14,
+    //   "17:30": 15,
+    // };
 
     let slotsData = [];
 

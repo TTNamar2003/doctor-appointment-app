@@ -1,5 +1,5 @@
 import db from "../config/db.js";
-
+import { timeSlotMap } from "../utils/timeSlot.js";
 export const checkAvailability = async (doctor_id, date, shift) => {
   try {
     const query = `
@@ -269,25 +269,26 @@ export const addSlotBackToAvailability = async (
     endMinute = 0;
   }
 
+  const TIME_SLOT_MAP = timeSlotMap;
   // time slot mapping for consistency
-  const TIME_SLOT_MAP = {
-    "9:00": 0,
-    "9:30": 1,
-    "10:00": 2,
-    "10:30": 3,
-    "11:00": 4,
-    "11:30": 5,
-    "12:00": 6,
-    "12:30": 7,
-    "14:00": 8,
-    "14:30": 9,
-    "15:00": 10,
-    "15:30": 11,
-    "16:00": 12,
-    "16:30": 13,
-    "17:00": 14,
-    "17:30": 15,
-  };
+  // const TIME_SLOT_MAP = {
+  //   "9:00": 0,
+  //   "9:30": 1,
+  //   "10:00": 2,
+  //   "10:30": 3,
+  //   "11:00": 4,
+  //   "11:30": 5,
+  //   "12:00": 6,
+  //   "12:30": 7,
+  //   "14:00": 8,
+  //   "14:30": 9,
+  //   "15:00": 10,
+  //   "15:30": 11,
+  //   "16:00": 12,
+  //   "16:30": 13,
+  //   "17:00": 14,
+  //   "17:30": 15,
+  // };
   const endTime = `${endHour}:${endMinute === 0 ? "00" : "30"}`;
   const startIndex = TIME_SLOT_MAP[start_time];
 

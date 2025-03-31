@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "../model/userModel.js";
 import { signupSchema, loginSchema } from "../utils/validator.js";
 
-const JWT_SECRET = process.env.JWT_SECRET || "hello123";
+const JWT_SECRET = process.env.JWT_SECRET;
 
 // function for jwt token creation
 const createToken = (payload) => {
@@ -155,4 +155,29 @@ export const checkAlreadyLoggedIn = (req, res) => {
   } catch (error) {
     res.status(500).json({ success: false, message: "Internal Server Error" });
   }
+};
+
+export const googleAuth = (req, res) => {
+  const { user } = req;
+
+  console.log(user);
+  const token = jwt.sign(
+    {
+      user_id: user.id,
+      email: user.email,
+      name: user.name,
+      role: user.role,
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "2d" }
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
+  });
+
+  res.redirect("http://localhost:3001/doctors");
 };

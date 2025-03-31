@@ -6,9 +6,10 @@ interface RadioItemProps {
     idName: string;
     name: string;
     onChange: () => void;
+    checked?: boolean;
 }
 
-export default function RadioItem({ radioName, idName, name, onChange }: RadioItemProps) {
+export default function RadioItem({ radioName, idName, name, onChange, checked }: RadioItemProps) {
     return (
         <div className={styles.radio_container}>
             <input
@@ -16,6 +17,7 @@ export default function RadioItem({ radioName, idName, name, onChange }: RadioIt
                 id={idName}
                 name={name}
                 onChange={onChange}
+                checked={checked}
             />
             <label htmlFor={idName}>{radioName}</label>
         </div>

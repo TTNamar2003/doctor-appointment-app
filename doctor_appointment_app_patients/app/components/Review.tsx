@@ -1,110 +1,148 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from '@/app/styles/Review.module.css';
 import Image from 'next/image';
 import star from '@/public/images/one_star.svg';
+import { useParams } from 'next/navigation';
+
+interface PendingReview {
+    appointment_id: string;
+    patient_name: string;
+}
 
 interface Review {
-    id: number;
-    patientName: string;
+    review_id: string;
     rating: number;
-    comment: string;
-    date: string;
-    status: 'pending' | 'completed';
+    comments: string;
+    created_at: string;
+    patient_name: string;
 }
 
 export default function Review() {
+    const { id } = useParams();
     const [rating, setRating] = useState<number>(0);
     const [comment, setComment] = useState<string>('');
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [currentPendingPage, setCurrentPendingPage] = useState<number>(1);
-    const [selectedPendingReview, setSelectedPendingReview] = useState<Review | null>(null);
+    const [pendingReviews, setPendingReviews] = useState<PendingReview[]>([]);
+    const [selectedPendingReview, setSelectedPendingReview] = useState<PendingReview | null>(null);
+    const [completedReviews, setCompletedReviews] = useState<Review[]>([]);
     const reviewsPerPage = 5;
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    // Mock data for reviews
-    const reviews: Review[] = [
-        {
-            id: 1,
-            patientName: "John Doe",
-            rating: 5,
-            comment: "Excellent doctor, very professional and caring.",
-            date: "2024-03-15",
-            status: 'completed'
-        },
-        {
-            id: 2,
-            patientName: "Jane Smith",
-            rating: 4,
-            comment: "Good experience overall, would recommend.",
-            date: "2024-03-14",
-            status: 'completed'
-        },
-        {
-            id: 3,
-            patientName: "Alice Johnson",
-            rating: 0,
-            comment: "",
-            date: "2024-03-16",
-            status: 'pending'
-        },
-        {
-            id: 4,
-            patientName: "Bob Wilson",
-            rating: 0,
-            comment: "",
-            date: "2024-03-16",
-            status: 'pending'
-        },
-        {
-            id: 5,
-            patientName: "Carol Brown",
-            rating: 0,
-            comment: "",
-            date: "2024-03-16",
-            status: 'pending'
-        },
-        {
-            id: 6,
-            patientName: "David Lee",
-            rating: 5,
-            comment: "Great bedside manner and thorough examination.",
-            date: "2024-03-13",
-            status: 'completed'
+    useEffect(() => {
+        fetchPendingReviews();
+        fetchCompletedReviews();
+    }, [id]);
+
+    const fetchPendingReviews = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/doctor/${id}/reviews/user`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setPendingReviews(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching pending reviews:', error);
         }
-    ];
+    };
+
+    const fetchCompletedReviews = async () => {
+        try {
+            const response = await fetch(
+                `http://localhost:5000/doctor/${id}/reviews`,
+                {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                }
+            );
+
+            if (response.ok) {
+                const data = await response.json();
+                setCompletedReviews(data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching completed reviews:', error);
+        }
+    };
 
     const handleRatingClick = (value: number) => {
         setRating(value);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle review submission here
-        console.log({ rating, comment, reviewId: selectedPendingReview?.id });
-        setRating(0);
-        setComment('');
-        setSelectedPendingReview(null);
+        if (!selectedPendingReview || !rating || !comment) {
+            alert('Please provide both rating and comment');
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const response = await fetch(
+                `http://localhost:5000/doctor/${id}/reviews/user/${selectedPendingReview.appointment_id}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        rating: rating,
+                        comment: comment
+                    })
+                }
+            );
+
+            if (response.ok) {
+                // Remove the submitted review from pending reviews
+                setPendingReviews(prev => 
+                    prev.filter(review => review.appointment_id !== selectedPendingReview.appointment_id)
+                );
+                setRating(0);
+                setComment('');
+                setSelectedPendingReview(null);
+                alert('Review submitted successfully!');
+            } else {
+                const errorData = await response.json();
+                alert(errorData.message || 'Failed to submit review');
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('Failed to submit review. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
-    const handlePendingReviewClick = (review: Review) => {
+    const handlePendingReviewClick = (review: PendingReview) => {
         setSelectedPendingReview(review);
     };
 
-    // Filter reviews
-    const completedReviews = reviews.filter(review => review.status === 'completed');
-    const pendingReviews = reviews.filter(review => review.status === 'pending');
-
-    // Pagination logic for completed reviews
-    const indexOfLastReview = currentPage * reviewsPerPage;
-    const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
-    const currentReviews = completedReviews.slice(indexOfFirstReview, indexOfLastReview);
-    const totalPages = Math.ceil(completedReviews.length / reviewsPerPage);
-
-    // Pagination logic for pending reviews
-    const indexOfLastPendingReview = currentPendingPage * reviewsPerPage;
-    const indexOfFirstPendingReview = indexOfLastPendingReview - reviewsPerPage;
-    const currentPendingReviews = pendingReviews.slice(indexOfFirstPendingReview, indexOfLastPendingReview);
+    // Pagination calculations
     const totalPendingPages = Math.ceil(pendingReviews.length / reviewsPerPage);
+    const totalPages = Math.ceil(completedReviews.length / reviewsPerPage);
+    const currentReviews = completedReviews.slice(
+        (currentPage - 1) * reviewsPerPage,
+        currentPage * reviewsPerPage
+    );
+    const currentPendingReviews = pendingReviews.slice(
+        (currentPendingPage - 1) * reviewsPerPage,
+        currentPendingPage * reviewsPerPage
+    );
 
     return (
         <div className={styles.review_container}>
@@ -115,12 +153,12 @@ export default function Review() {
                 <div className={styles.reviews_display_section}>
                     <h2>Pending Reviews</h2>
                     <div className={styles.reviews_list}>
-                        {currentPendingReviews.map((review) => (
-                            <div key={review.id} className={styles.review_card}>
-                                {selectedPendingReview?.id === review.id ? (
+                        {pendingReviews.map((review) => (
+                            <div key={review.appointment_id} className={styles.review_card}>
+                                {selectedPendingReview?.appointment_id === review.appointment_id ? (
                                     <div className={styles.pending_review_form}>
                                         <div className={styles.review_header}>
-                                            <h3>{review.patientName}</h3>
+                                            <h3>{review.patient_name}</h3>
                                             <button 
                                                 className={styles.cancel_button}
                                                 onClick={() => setSelectedPendingReview(null)}
@@ -155,20 +193,20 @@ export default function Review() {
                                             type="submit" 
                                             className={styles.submit_button}
                                             onClick={handleSubmit}
+                                            disabled={isSubmitting}
                                         >
-                                            Submit Review
+                                            {isSubmitting ? 'Submitting...' : 'Submit Review'}
                                         </button>
                                     </div>
                                 ) : (
                                     <div 
                                         className={styles.pending_review_card}
-                                        onClick={() => handlePendingReviewClick(review)}
+                                        onClick={() => setSelectedPendingReview(review)}
                                     >
                                         <div className={styles.review_header}>
-                                            <h3>{review.patientName}</h3>
+                                            <h3>{review.patient_name}</h3>
                                             <span className={styles.pending_status}>Pending</span>
                                         </div>
-                                        <p className={styles.review_date}>{review.date}</p>
                                     </div>
                                 )}
                             </div>
@@ -202,10 +240,10 @@ export default function Review() {
             <div className={styles.reviews_display_section}>
                 <h2>Patient Reviews</h2>
                 <div className={styles.reviews_list}>
-                    {currentReviews.map((review) => (
-                        <div key={review.id} className={styles.review_card}>
+                    {currentReviews.map((review: Review) => (
+                        <div key={review.review_id} className={styles.review_card}>
                             <div className={styles.review_header}>
-                                <h3>{review.patientName}</h3>
+                                <h3>{review.patient_name}</h3>
                                 <div className={styles.review_rating}>
                                     {[...Array(5)].map((_, index) => (
                                         <div
@@ -224,8 +262,8 @@ export default function Review() {
                                     ))}
                                 </div>
                             </div>
-                            <p className={styles.review_comment}>{review.comment}</p>
-                            <span className={styles.review_date}>{review.date}</span>
+                            <p className={styles.review_comment}>{review.comments}</p>
+                            <span className={styles.review_date}>{new Date(review.created_at).toLocaleDateString()}</span>
                         </div>
                     ))}
                 </div>

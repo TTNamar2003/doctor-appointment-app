@@ -19,7 +19,7 @@ interface PatientInfo {
 export default function LandingPage() {
   const { id } = useParams();
   const pathname = usePathname();
-  const isAppointment = /^\/doctors\/\d+\/appointment$/.test(pathname);
+  const isAppointment = /^\/doctors\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/appointment$/i.test(pathname);
   const [isLargeScreen, setIsLargeScreen] = useState<boolean>(false);
   const [isPatientFormFill, setPatientFormFill] = useState<boolean>(false);
   const [patientInfo, setPatientInfo] = useState<PatientInfo>({

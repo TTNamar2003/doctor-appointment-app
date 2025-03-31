@@ -104,11 +104,11 @@ export default function DisplayDoctor() {
 
         const data = await response.json();
         setDoctors(data.data);
-        setPagination({
-          totalRecords: data.totalRecords,
-          totalPages: data.totalPages,
+        setPagination(prev => ({
+          totalRecords: page === 1 ? data.totalRecords : prev.totalRecords,
+          totalPages: page === 1 ? data.totalPages : prev.totalPages,
           currentPage: data.currentPage,
-        });
+        }));
       } catch (err) {
         setError(err instanceof Error ? err.message : "An error occurred");
       } finally {
@@ -166,42 +166,44 @@ export default function DisplayDoctor() {
 
       <div className={styles.filter_cards}>
         <div className={styles.filter_component_div}>
-          <Filter onFilterChange={handleFilterChange} />
+          <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
         </div>
-        <article className={styles.cards_container}>
-          {loading ? (
-            <div className={styles.loading}>Loading...</div>
-          ) : error ? (
-            <div className={styles.error}>{error}</div>
-          ) : (
-            <>
-              {doctors.map((doctor) => (
-                <DoctorCard key={doctor.doctor_id} doctor={doctor} />
-              ))}
-              {pagination.totalPages > 1 && (
-                <div className={styles.pagination}>
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage - 1)}
-                    disabled={pagination.currentPage === 1}
-                    className={styles.pagination_button}
-                  >
-                    Previous
-                  </button>
-                  <span className={styles.page_info}>
-                    Page {pagination.currentPage} of {pagination.totalPages}
-                  </span>
-                  <button
-                    onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    disabled={pagination.currentPage === pagination.totalPages}
-                    className={styles.pagination_button}
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
-            </>
+        <div className={styles.cards_and_pagination}>
+          <article className={styles.cards_container}>
+            {loading ? (
+              <div className={styles.loading}>Loading...</div>
+            ) : error ? (
+              <div className={styles.error}>{error}</div>
+            ) : (
+              <>
+                {doctors.map((doctor) => (
+                  <DoctorCard key={doctor.doctor_id} doctor={doctor} />
+                ))}
+              </>
+            )}
+          </article>
+          {pagination.totalPages > 1 && (
+            <div className={styles.pagination}>
+              <button
+                onClick={() => handlePageChange(pagination.currentPage - 1)}
+                disabled={pagination.currentPage === 1}
+                className={styles.pagination_button}
+              >
+                Previous
+              </button>
+              <span className={styles.page_info}>
+                Page {pagination.currentPage} of {pagination.totalPages}
+              </span>
+              <button
+                onClick={() => handlePageChange(pagination.currentPage + 1)}
+                disabled={pagination.currentPage === pagination.totalPages}
+                className={styles.pagination_button}
+              >
+                Next
+              </button>
+            </div>
           )}
-        </article>
+        </div>
       </div>
 
       <Footer />
@@ -219,7 +221,7 @@ export default function DisplayDoctor() {
               X
             </button>
             <div className={styles.filter_component_div_sidebar}>
-              <Filter onFilterChange={handleFilterChange} />
+              <Filter onFilterChange={handleFilterChange} currentFilters={filters} />
             </div>
           </aside>
         </div>

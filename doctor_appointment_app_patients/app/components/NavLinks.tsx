@@ -8,7 +8,10 @@ export default function NavLinks() {
   const { id } = useParams();
   const pathname = usePathname();
 
-  const isDoctorProfile = /^\/doctors\/\d+$/.test(pathname);
+  const isDoctorProfile =
+    /^\/doctors\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      pathname
+    );
 
   return (
     <div className={styles.navLinks_container}>
@@ -22,10 +25,10 @@ export default function NavLinks() {
         {isDoctorProfile && (
           <>
             <li>
-              <Link href={`/doctor/${id}/appointment`}>Appointment</Link>
+              <Link href={`/doctors/${id}/appointment`}>Appointment</Link>
             </li>
             <li>
-              <Link href={`/doctor/${id}/reviews`}>Reviews</Link>
+              <Link href={`/doctors/${id}/reviews`}>Reviews</Link>
             </li>
           </>
         )}

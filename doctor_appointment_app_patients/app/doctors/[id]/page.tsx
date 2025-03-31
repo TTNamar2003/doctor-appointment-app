@@ -1,3 +1,4 @@
+"use client";
 import DoctorProfile from "@/app/components/DoctorProfile";
 import Footer from "@/app/components/Footer";
 import NotLogin from "@/app/components/NotLogin";

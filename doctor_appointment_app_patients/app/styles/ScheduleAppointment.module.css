@@ -57,16 +57,40 @@
   align-items: center;
   justify-content: center;
   padding: 10px;
-  border: none;
-  background-color: #1c4a2a;
-  color: white;
+  border: 1px solid #1c4a2a;
+
   text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
 }
 
-.appointment_div div:nth-child(2) button:nth-child(2) {
+.selected_consult {
+  background-color: #1c4a2a;
+  color: white;
+  border-radius: 8px;
+  border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
+.selected_consult:hover {
+  background-color: #153a22;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(28, 74, 42, 0.2);
+}
+
+.unselected_consult {
   background-color: white;
-  color: black;
-  border: 1px solid rgba(244, 215, 208, 1);
+  color: #1c4a2a;
+  border-radius: 8px;
+  border-top-left-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+.unselected_consult:hover {
+  background-color: #f8f8f8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(28, 74, 42, 0.1);
 }
 
 .appointment_div div:nth-child(3) select {
@@ -137,6 +161,12 @@
   flex: 0 0 auto;
   padding: 5px;
   transition: transform 0.3s ease-in-out, background-color 0.3s;
+  cursor: pointer;
+}
+
+.date_div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .date_div p {
@@ -149,6 +179,15 @@
   color: white;
   font-weight: bold;
   border: 2px solid darkgreen;
+}
+
+.selected_date {
+  background-color: #4CAF50;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #45a049;
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
 }
 
 .arrowImageDiv {
@@ -232,8 +271,36 @@
   transition: background-color 0.2s;
 }
 
-.slot_time > div:hover {
-  background-color: #f0f0f0;
+.available {
+  background-color: #4CAF50 !important;
+  color: white !important;
+  border: none !important;
+  cursor: pointer !important;
+}
+
+.available:hover {
+  background-color: #45a049 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.2);
+}
+
+.selected_slot {
+  background-color: #1c4a2a !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(28, 74, 42, 0.3);
+  border: 2px solid #45a049 !important;
+}
+
+.unavailable {
+  background-color: #f8f8f8 !important;
+  color: #999 !important;
+  border: 1px solid #e0e0e0 !important;
+  cursor: not-allowed !important;
+}
+
+.unavailable:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .next_btn_div {
@@ -257,6 +324,16 @@
 .next_btn_div button:hover {
   background-color: #163a22;
 }
+
+.disabled_button {
+  background-color: #cccccc !important;
+  cursor: not-allowed !important;
+}
+
+.disabled_button:hover {
+  background-color: #cccccc !important;
+}
+
 @media (max-width: 1200px) {
   .appointment_container {
     overflow-y: inherit;

@@ -8,6 +8,7 @@ import {
   googleAuth,
 } from "../controllers/authController.js";
 import isAuth from "../middleware/isAuth.js";
+import isAdmin from "../middleware/isAdmin.js";
 
 const router = Router();
 
@@ -27,5 +28,6 @@ router.get(
 );
 
 router.get("/checkLoggedIn", isAuth, checkAlreadyLoggedIn);
+router.get("/checkLoggedInAdmin", isAuth, isAdmin, checkAlreadyLoggedIn);
 
 export default router;

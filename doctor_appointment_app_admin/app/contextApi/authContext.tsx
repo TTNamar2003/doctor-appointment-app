@@ -25,28 +25,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLogin, setIsLogin] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const router = useRouter();
+  const checkLoginStatus = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/checkLoggedInAdmin", {
+        method: "GET",
+        credentials: "include",
+      });
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/checkLoggedIn", {
-          method: "GET",
-          credentials: "include",
-        });
-
-        if (response.ok) {
-          setIsLogin(true);
-        } else {
-          setIsLogin(false);
-        }
-      } catch (error) {
-        console.error("Error checking login status:", error);
+      if (response.ok) {
+        console.log("working");
+        setIsLogin(true);
+      } else {
         setIsLogin(false);
-      } finally {
-        setIsLoading(false);
       }
-    };
-
+    } catch (error) {
+      console.error("Error checking login status:", error);
+      setIsLogin(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  useEffect(() => {
     checkLoginStatus();
   }, []);
 
@@ -60,8 +59,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (response.ok) {
-        setIsLogin(true);
-        router.push("/dashboard");
+        checkLoginStatus();
+        if (isLogin) {
+          router.push("/dashboard");
+        } else {
+          alert("invalid admin");
+        }
       } else {
         console.error("Login failed");
       }
